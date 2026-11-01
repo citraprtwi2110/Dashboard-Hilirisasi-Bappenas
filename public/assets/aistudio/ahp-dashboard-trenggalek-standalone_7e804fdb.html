@@ -1,0 +1,1123 @@
+<!doctype html>
+<html lang="id"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light}html{padding-block:env(safe-area-inset-top,0px) env(safe-area-inset-bottom,0px)}body{margin:0}[hidden]{display:none!important}</style></head><body>
+<title>Dasbor AHP Trenggalek</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap">
+<style>
+/* Tata letak: bilah sisi navigasi + konten; kartu hanya untuk panel utama, selebihnya baris dan pemisah tipis */
+:root{
+  --bg:#F2F5F9; --surface:#FFFFFF; --surface2:#E9EFF6; --ink:#12233A; --ink2:#46586F; --muted:#5C6D83; --line:#D6DFEA;
+  --accent:#1F6FB5; --accent-ink:#FFFFFF; --accent-soft:#E2EEF9; --sideb:#6250D6;
+  --good:#0CA30C; --good-t:#0E700E; --warn:#FAB219; --warn-t:#85580A; --serious:#EC835A; --crit:#D03B3B; --crit-t:#AE2B2B;
+  --good-bg:#E3F5E3; --warn-bg:#FFF3D6; --crit-bg:#FBE4E4; --neutral-bg:#E9EFF6;
+  --c1:#2A78D6; --c2:#EB6834; --c3:#1BAF7A; --c4:#EDA100; --c5:#E87BA4; --c6:#008300;
+  --shadow:0 1px 2px rgba(18,35,58,.06),0 4px 14px rgba(18,35,58,.05);
+  --font:'Plus Jakarta Sans','Segoe UI',system-ui,-apple-system,sans-serif; --mono:'IBM Plex Mono',ui-monospace,Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
+  --bg:#0D1626; --surface:#15233A; --surface2:#1C2D48; --ink:#E7EDF5; --ink2:#B6C3D5; --muted:#98A8BD; --line:#2A3C58;
+  --accent:#5FA8F0; --accent-ink:#0B1A2E; --accent-soft:#1A3556; --sideb:#9085E9;
+  --good:#0CA30C; --good-t:#5FD35F; --warn:#FAB219; --warn-t:#F5C95E; --serious:#EC835A; --crit:#D03B3B; --crit-t:#F08A8A;
+  --good-bg:#12331A; --warn-bg:#3A2F10; --crit-bg:#3C1B1E; --neutral-bg:#1C2D48;
+  --c1:#3987E5; --c2:#D95926; --c3:#199E70; --c4:#C98500; --c5:#D55181; --c6:#008300;
+  --shadow:0 1px 2px rgba(0,0,0,.4),0 4px 14px rgba(0,0,0,.25); color-scheme:dark; } }
+:root[data-theme="dark"]{
+  --bg:#0D1626; --surface:#15233A; --surface2:#1C2D48; --ink:#E7EDF5; --ink2:#B6C3D5; --muted:#98A8BD; --line:#2A3C58;
+  --accent:#5FA8F0; --accent-ink:#0B1A2E; --accent-soft:#1A3556; --sideb:#9085E9;
+  --good:#0CA30C; --good-t:#5FD35F; --warn:#FAB219; --warn-t:#F5C95E; --serious:#EC835A; --crit:#D03B3B; --crit-t:#F08A8A;
+  --good-bg:#12331A; --warn-bg:#3A2F10; --crit-bg:#3C1B1E; --neutral-bg:#1C2D48;
+  --c1:#3987E5; --c2:#D95926; --c3:#199E70; --c4:#C98500; --c5:#D55181; --c6:#008300;
+  --shadow:0 1px 2px rgba(0,0,0,.4),0 4px 14px rgba(0,0,0,.25); color-scheme:dark; }
+*{box-sizing:border-box}
+html,body{height:auto}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--font);font-size:15px;line-height:1.5;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:0 40px}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:60;background:var(--surface)}
+h1,h2,h3,h4{margin:0;line-height:1.25;text-wrap:balance}
+button{font:inherit;color:inherit;cursor:pointer}
+input,select,textarea{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:6px}
+.num{font-family:var(--mono);font-variant-numeric:tabular-nums}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+/* ---- header ---- */
+.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:50;background:var(--surface);border-bottom:1px solid var(--line);
+  margin:0 calc(-1*max(16px,env(safe-area-inset-left,0px)));padding:10px max(16px,env(safe-area-inset-right,0px)) 0 max(16px,env(safe-area-inset-left,0px))}
+.top-row{display:flex;align-items:center;gap:12px;flex-wrap:wrap;max-width:1320px;margin:0 auto}
+.brand{display:flex;flex-direction:column;min-width:0;margin-right:auto}
+.brand b{font-size:17px;font-weight:800;letter-spacing:-.01em}
+.brand span{font-size:12px;color:var(--muted)}
+.live{display:inline-flex;align-items:center;gap:8px;font-size:12.5px;color:var(--ink2);background:var(--surface2);border-radius:999px;padding:5px 12px}
+.dot-live{width:8px;height:8px;border-radius:50%;background:var(--good);box-shadow:0 0 0 0 rgba(12,163,12,.5);animation:pulse 2s infinite}
+.live.off .dot-live{background:var(--muted);animation:none}
+.live.demo .dot-live{background:var(--warn);animation:none}
+@keyframes pulse{70%{box-shadow:0 0 0 8px rgba(12,163,12,0)}100%{box-shadow:0 0 0 0 rgba(12,163,12,0)}}
+@media (prefers-reduced-motion:reduce){.dot-live{animation:none}}
+.switch{display:inline-flex;align-items:center;gap:8px;font-size:12.5px;color:var(--ink2);cursor:pointer;user-select:none}
+.switch input{appearance:none;width:34px;height:20px;border-radius:999px;background:var(--line);position:relative;cursor:pointer;margin:0;transition:background .15s}
+.switch input::after{content:"";position:absolute;top:2px;left:2px;width:16px;height:16px;border-radius:50%;background:var(--surface);transition:transform .15s;box-shadow:0 1px 2px rgba(0,0,0,.3)}
+.switch input:checked{background:var(--accent)}
+.switch input:checked::after{transform:translateX(14px)}
+.tabs{display:flex;gap:2px;overflow-x:auto;max-width:1320px;margin:6px auto 0;scrollbar-width:none}
+.tabs::-webkit-scrollbar{display:none}
+.tab{appearance:none;border:0;background:none;white-space:nowrap;padding:10px 14px;font-size:14px;font-weight:600;color:var(--muted);border-bottom:3px solid transparent;display:flex;gap:8px;align-items:center;text-decoration:none}
+.tab:hover{color:var(--ink)}
+.tab[aria-current="page"]{color:var(--accent);border-bottom-color:var(--accent)}
+.tab .badge{font-family:var(--mono);font-size:11px;background:var(--surface2);color:var(--ink2);border-radius:999px;padding:1px 7px}
+.tab[aria-current="page"] .badge{background:var(--accent-soft);color:var(--accent)}
+main{max-width:1320px;margin:0 auto;padding-block:22px 10px;display:flex;flex-direction:column;gap:20px;min-width:0}
+.banner{border-radius:10px;padding:10px 14px;font-size:13.5px;background:var(--warn-bg);color:var(--warn-t);display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.banner.info{background:var(--accent-soft);color:var(--ink)}
+.banner button{margin-left:auto}
+.pagehead{display:flex;gap:16px;flex-wrap:wrap;align-items:flex-end;justify-content:space-between}
+.pagehead h1{font-size:24px;font-weight:800;letter-spacing:-.015em}
+.pagehead p{margin:4px 0 0;color:var(--ink2);max-width:72ch;font-size:14.5px}
+/* ---- komponen ---- */
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:18px 20px;box-shadow:var(--shadow);min-width:0}
+.panel>h2,.ph h2{font-size:16px;font-weight:700}
+.ph{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;justify-content:space-between;margin-bottom:14px}
+.ph small,.sub{color:var(--muted);font-size:12.5px}
+.grid{display:grid;gap:20px;min-width:0}
+.g2{grid-template-columns:repeat(2,minmax(0,1fr))}
+.g3{grid-template-columns:repeat(3,minmax(0,1fr))}
+.g-main{grid-template-columns:minmax(0,1.5fr) minmax(0,1fr)}
+.g-eq{grid-template-columns:minmax(0,1fr) minmax(0,1.3fr)}
+@media(max-width:960px){.g2,.g3,.g-main,.g-eq{grid-template-columns:minmax(0,1fr)}}
+.kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}
+@media(max-width:900px){.kpis{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.kpi{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:14px 16px;box-shadow:var(--shadow);min-width:0}
+.kpi .l{font-size:12.5px;color:var(--muted);font-weight:600}
+.kpi .v{font-size:28px;font-weight:800;letter-spacing:-.02em;margin-top:2px;display:flex;align-items:baseline;gap:6px}
+.kpi .v small{font-size:13px;font-weight:600;color:var(--muted)}
+.kpi .s{font-size:12.5px;color:var(--ink2);margin-top:2px}
+.meter{height:6px;border-radius:99px;background:var(--surface2);overflow:hidden;margin-top:8px}
+.meter i{display:block;height:100%;background:var(--accent);border-radius:99px;transition:width .4s}
+.btn{appearance:none;border:1px solid var(--line);background:var(--surface);color:var(--ink);padding:8px 14px;border-radius:10px;font-weight:600;font-size:14px;display:inline-flex;align-items:center;gap:8px}
+.btn:hover{border-color:var(--accent);color:var(--accent)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.btn.primary:hover{filter:brightness(1.08);color:var(--accent-ink)}
+.btn.danger{color:var(--crit-t);border-color:var(--crit)}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.btn.sm{padding:5px 10px;font-size:13px;border-radius:8px}
+.seg{display:inline-flex;background:var(--surface2);border-radius:10px;padding:3px;gap:2px;flex-wrap:wrap}
+.seg button{appearance:none;border:0;background:none;padding:6px 12px;border-radius:8px;font-size:13px;font-weight:600;color:var(--ink2)}
+.seg button[aria-pressed="true"]{background:var(--surface);color:var(--accent);box-shadow:0 1px 2px rgba(0,0,0,.12)}
+.chip{display:inline-flex;align-items:center;gap:5px;border-radius:999px;padding:2px 9px;font-size:12px;font-weight:700;white-space:nowrap}
+.chip.ok{background:var(--good-bg);color:var(--good-t)} .chip.bahas{background:var(--warn-bg);color:var(--warn-t)}
+.chip.tolak{background:var(--crit-bg);color:var(--crit-t)} .chip.belum{background:var(--neutral-bg);color:var(--muted)}
+.chip.cr-ok{background:var(--good-bg);color:var(--good-t)} .chip.cr-bad{background:var(--crit-bg);color:var(--crit-t)}
+.cdot{display:inline-block;width:10px;height:10px;border-radius:3px;flex:none}
+.c1{background:var(--c1)}.c2{background:var(--c2)}.c3{background:var(--c3)}.c4{background:var(--c4)}.c5{background:var(--c5)}.c6{background:var(--c6)}
+.f-c1{--cc:var(--c1)}.f-c2{--cc:var(--c2)}.f-c3{--cc:var(--c3)}.f-c4{--cc:var(--c4)}.f-c5{--cc:var(--c5)}.f-c6{--cc:var(--c6)}
+/* batang horizontal */
+.hb{display:grid;grid-template-columns:minmax(120px,210px) minmax(0,1fr) 62px;align-items:center;gap:10px;padding:6px 0;font-size:13.5px}
+.hb+.hb{border-top:1px solid var(--line)}
+.hb .nm{display:flex;gap:8px;align-items:center;min-width:0;line-height:1.3}
+.hb .nm span{overflow-wrap:anywhere}
+.track{position:relative;height:16px;background:var(--surface2);border-radius:4px;overflow:visible}
+.fill{position:absolute;inset:0 auto 0 0;background:var(--cc,var(--accent));border-radius:4px;min-width:2px;transition:width .45s}
+.whisk{position:absolute;top:50%;height:2px;background:var(--ink);opacity:.55;transform:translateY(-50%)}
+.whisk::before,.whisk::after{content:"";position:absolute;top:-4px;width:2px;height:10px;background:var(--ink)}
+.whisk::before{left:0}.whisk::after{right:0}
+.hb .val{text-align:right;font-weight:600}
+.rank{width:22px;text-align:right;color:var(--muted);font-family:var(--mono);font-size:12px;flex:none}
+@media(max-width:560px){.hb{grid-template-columns:minmax(0,1fr) 54px}.hb .track{grid-column:1/-1;order:3}}
+table.t{width:100%;border-collapse:collapse;font-size:13.5px}
+table.t th{text-align:left;font-size:12px;color:var(--muted);font-weight:700;padding:8px 10px;border-bottom:1px solid var(--line);white-space:nowrap}
+table.t td{padding:9px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+table.t tr:last-child td{border-bottom:0}
+table.t td.r,table.t th.r{text-align:right}
+.scrollx{overflow-x:auto;max-width:100%}
+.empty{padding:28px 12px;text-align:center;color:var(--muted);font-size:14px}
+.empty b{display:block;color:var(--ink);font-size:15px;margin-bottom:4px}
+/* ---- instrumen ---- */
+.steps{display:flex;gap:8px;overflow-x:auto;padding-bottom:4px}
+.step{appearance:none;flex:none;border:1px solid var(--line);background:var(--surface);border-radius:12px;padding:8px 12px;text-align:left;min-width:128px}
+.step b{display:flex;gap:6px;align-items:center;font-size:13px}
+.step small{color:var(--muted);font-size:12px}
+.step[aria-current="step"]{border-color:var(--accent);background:var(--accent-soft)}
+.step.done small{color:var(--good-t)}
+.work{display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:20px;align-items:start}
+@media(max-width:1020px){.work{grid-template-columns:minmax(0,1fr)}}
+.sticky{position:sticky;top:calc(env(safe-area-inset-top,0px) + 112px)}
+@media(max-width:1020px){.sticky{position:static}}
+.pair{padding:16px 0;border-top:1px solid var(--line)}
+.pair:first-child{border-top:0;padding-top:4px}
+.pair-h{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);gap:12px;align-items:start}
+.pair-h .a,.pair-h .b{font-weight:700;font-size:14.5px;line-height:1.3;min-width:0;overflow-wrap:break-word}
+.pair-h .b{text-align:right}
+.pair-h .a{color:var(--accent)} .pair-h .b{color:var(--sideb)}
+.vs{font-size:11px;color:var(--muted);font-weight:700;padding-top:3px}
+details.more{margin-top:4px;font-size:12.5px;color:var(--ink2)}
+details.more summary{cursor:pointer;color:var(--muted);font-size:12px;width:fit-content}
+details.more p{margin:6px 0 0}
+.pair-h .b details{margin-left:auto}
+.scale{display:flex;align-items:center;justify-content:space-between;gap:2px;margin-top:12px}
+.dotb{appearance:none;border:0;background:none;padding:6px 0;display:flex;flex-direction:column;align-items:center;gap:3px;flex:1;min-width:0}
+.dotb i{--b:14px;--st:1.7px;display:block;width:calc(var(--b) + var(--n)*var(--st));height:calc(var(--b) + var(--n)*var(--st));border-radius:50%;border:2px solid var(--bc);background:transparent;transition:transform .12s,background .12s}
+.dotb em{font-style:normal;font-family:var(--mono);font-size:10.5px;color:var(--muted)}
+.dotb:hover i{transform:scale(1.15);background:color-mix(in srgb,var(--bc) 25%,transparent)}
+.dotb[aria-checked="true"] i{background:var(--bc)}
+.dotb[aria-checked="true"] em{color:var(--ink);font-weight:700}
+.dotb.l{--bc:var(--accent)} .dotb.r{--bc:var(--sideb)} .dotb.m{--bc:var(--muted)}
+.interp{margin-top:8px;font-size:13px;color:var(--ink2);min-height:20px}
+.interp b{color:var(--ink)}
+.live-card h3{font-size:14px;margin-bottom:10px}
+.nav-row{display:flex;justify-content:space-between;gap:10px;margin-top:16px;flex-wrap:wrap}
+.form{display:grid;gap:14px;max-width:520px}
+.form label{display:grid;gap:5px;font-size:13px;font-weight:600;color:var(--ink2)}
+.form input,.form select,.form textarea,.inp{border:1px solid var(--line);background:var(--surface);border-radius:10px;padding:9px 12px;font-size:14.5px;width:100%}
+.form input:focus,.form select:focus,.form textarea:focus,.inp:focus{border-color:var(--accent);outline:2px solid var(--accent-soft)}
+textarea{resize:vertical;min-height:60px}
+/* ---- konfirmasi ---- */
+.cgroup{padding:6px 0 2px}
+.cg-h{display:flex;gap:10px;align-items:center;margin:6px 0 4px}
+.cg-h h3{font-size:15px}
+.cg-h small{color:var(--muted)}
+.ci{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,1fr);gap:18px;padding:14px 0;border-top:1px solid var(--line)}
+@media(max-width:860px){.ci{grid-template-columns:minmax(0,1fr)}}
+.ci h4{font-size:14.5px;font-weight:700;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.ci .def{font-size:13px;color:var(--ink2);margin:4px 0 2px}
+.ci .ind{font-size:12.5px;color:var(--muted)}
+.ci .base{font-size:12.5px;margin-top:4px;padding:6px 10px;background:var(--surface2);border-radius:8px;color:var(--ink2)}
+.votes{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}
+.vb{appearance:none;border:1px solid var(--line);background:var(--surface);padding:7px 12px;border-radius:10px;font-size:13px;font-weight:600;display:flex;gap:7px;align-items:center}
+.vb:hover{border-color:var(--accent)}
+.vb[aria-pressed="true"].S{background:var(--good-bg);border-color:var(--good);color:var(--good-t)}
+.vb[aria-pressed="true"].C{background:var(--warn-bg);border-color:var(--warn);color:var(--warn-t)}
+.vb[aria-pressed="true"].T{background:var(--crit-bg);border-color:var(--crit);color:var(--crit-t)}
+.noteb{margin-top:8px}
+.noteb textarea{font-size:13.5px;min-height:52px}
+.tally{display:flex;flex-direction:column;gap:6px;font-size:13px}
+.stack{display:flex;height:14px;border-radius:5px;overflow:hidden;gap:2px;background:var(--surface2)}
+.stack i{display:block;height:100%}
+.stack .S{background:var(--good)} .stack .C{background:var(--warn)} .stack .T{background:var(--crit)}
+.legend{display:flex;gap:12px;flex-wrap:wrap;font-size:12.5px;color:var(--ink2)}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.legend i{width:10px;height:10px;border-radius:3px;display:inline-block}
+.notes-l{font-size:12.5px;color:var(--ink2);margin:0;padding-left:16px}
+/* ---- fishbone ---- */
+.fish-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:12px;background:var(--surface)}
+svg.fish{display:block;min-width:960px;width:100%;height:auto}
+.fish text{font-family:var(--font);fill:var(--ink)}
+.fish .lbl-s{font-size:11px;fill:var(--muted);font-family:var(--mono)}
+.rib{cursor:pointer}
+.rib:hover .rl,.rib:focus .rl,.rib.sel .rl{stroke-opacity:1}
+.rib.sel text.n{font-weight:800}
+.rib .hit{fill:transparent}
+.fish .bone{stroke-linecap:round}
+.fish .head rect{fill:var(--ink)} .fish .head text{fill:var(--bg)}
+.sidepanel dl{margin:0;display:grid;grid-template-columns:auto 1fr;gap:6px 14px;font-size:13.5px}
+.sidepanel dt{color:var(--muted)} .sidepanel dd{margin:0;font-weight:600;text-align:right}
+.formula{font-family:var(--mono);font-size:13px;background:var(--surface2);border-radius:10px;padding:10px 12px;overflow-x:auto;white-space:pre-wrap}
+.pareto .hb{grid-template-columns:minmax(130px,230px) minmax(0,1fr) 54px 54px}
+@media(max-width:700px){.pareto .hb{grid-template-columns:minmax(0,1fr) 54px 54px}.pareto .hb .track{grid-column:1/-1;order:5}}
+input[type=range]{width:100%;accent-color:var(--accent)}
+.ctrl{display:flex;gap:18px;flex-wrap:wrap;align-items:center}
+.ctrl label{font-size:13px;color:var(--ink2);display:flex;gap:8px;align-items:center}
+.cell{display:inline-block;min-width:44px;text-align:center;border-radius:6px;padding:2px 6px;font-family:var(--mono);font-size:12px;font-weight:600}
+.cell.g{background:var(--good-bg);color:var(--good-t)} .cell.b{background:var(--crit-bg);color:var(--crit-t)} .cell.n{background:var(--neutral-bg);color:var(--muted)}
+.tree{display:grid;gap:10px}
+.tree-c{border:1px solid var(--line);border-radius:12px;padding:12px 14px;background:var(--surface)}
+.tree-c h3{font-size:15px;display:flex;gap:8px;align-items:center}
+.tree-c p{margin:2px 0 6px;color:var(--ink2);font-size:13px}
+.tree-c ul{margin:0;padding-left:0;list-style:none;display:grid;gap:4px;font-size:13.5px}
+.tree-c li{display:flex;gap:8px}
+.tree-c li .id{font-family:var(--mono);font-size:11.5px;color:var(--muted);flex:none;padding-top:2px;width:42px}
+#tip{position:fixed;z-index:80;pointer-events:none;background:var(--ink);color:var(--bg);font-size:12.5px;line-height:1.4;padding:8px 10px;border-radius:8px;max-width:280px;box-shadow:0 6px 20px rgba(0,0,0,.25)}
+#tip b{display:block;margin-bottom:2px}
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(20px + env(safe-area-inset-bottom,0px));background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:10px;font-size:13.5px;z-index:90;box-shadow:0 6px 20px rgba(0,0,0,.3)}
+.sv{font-size:12px;color:var(--muted);display:inline-flex;gap:6px;align-items:center}
+.sv.err{color:var(--crit-t)}
+.hide{display:none!important}
+
+.fish-hint{display:none}
+@media(max-width:700px){
+  .fish-hint{display:block}
+  .brand span{display:none}
+  .dotb i{--b:8px;--st:.95px;border-width:1.5px}
+  .dotb em{font-size:9.5px}
+  .pair-h{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
+  .vs{display:none}
+  .panel{padding:14px 14px}
+  .scale{gap:0}
+}
+.form-err{border-radius:10px;padding:10px 14px;font-size:13.5px;background:var(--crit-bg,#fde8e8);color:var(--crit-t);border:1px solid var(--crit)}
+.form-err[hidden]{display:none}
+.err-bar{position:fixed;left:12px;right:12px;bottom:12px;z-index:95;background:var(--surface);color:var(--crit-t);border:1.5px solid var(--crit);border-radius:12px;padding:10px 14px;font-size:13.5px;display:flex;gap:12px;align-items:center;box-shadow:0 8px 28px rgba(0,0,0,.28)}
+.err-bar span{flex:1}
+
+</style>
+<header class="top"><div class="top-row"><div class="brand"><b>AHP Trenggalek</b><span>Kajian Kesejahteraan Ekonomi 2026 · Bapperida Kabupaten Trenggalek</span></div>
+<span class="live" id="live"></span><label class="switch"><input type="checkbox" id="demoSw"> Data contoh</label></div>
+<nav class="tabs" id="tabs" aria-label="Menu utama"></nav></header>
+<main id="main" aria-live="polite"></main>
+<div id="tip" role="tooltip" hidden></div>
+<script>
+/* ===== HIERARKI AHP: Tujuan -> 6 kriteria (kategori 6M Fishbone) -> 18 variabel/indikator ===== */
+const GOAL = {
+  title: "Prioritas akar masalah kenaikan Indeks Gini Kabupaten Trenggalek",
+  question: "Faktor mana yang paling berpengaruh terhadap kenaikan ketimpangan pengeluaran (Gini 0,335 pada 2021 menjadi 0,359 pada 2025), dan seberapa kuat pengaruhnya dibanding faktor lain?"
+};
+const CRIT = [
+  { id:"MAN", en:"Man", name:"Sumber daya manusia", short:"SDM", color:"c1",
+    desc:"Pendidikan, keterampilan, dan kesempatan kerja penduduk.",
+    vars:[
+      { id:"MAN1", s:"Pendidikan pekerja", name:"Pendidikan pekerja", hyp:"H2",
+        def:"Tingkat pendidikan penduduk bekerja yang menentukan peluang memperoleh upah dan pekerjaan berproduktivitas tinggi.",
+        ind:"Persentase penduduk bekerja berpendidikan SMP ke bawah; rata-rata lama sekolah (RLS).",
+        base:"67,36% pekerja berpendidikan SMP ke bawah; RLS 8,09 tahun (2025)", src:"BPS, Sakernas dan IPM Kab. Trenggalek" },
+      { id:"MAN2", s:"Kesempatan kerja perempuan", name:"Kesempatan kerja perempuan", hyp:"H3",
+        def:"Partisipasi dan akses perempuan terhadap pekerjaan yang layak dan usaha produktif.",
+        ind:"TPAK perempuan; selisih TPAK laki-laki dan perempuan.",
+        base:"TPAK perempuan 68,78%; TPAK total 77,67% (2025)", src:"BPS, Sakernas" },
+      { id:"MAN3", s:"Serapan lulusan perg. tinggi", name:"Keterserapan lulusan perguruan tinggi", hyp:"H3",
+        def:"Kemampuan pasar kerja lokal menyerap lulusan pendidikan tinggi.",
+        ind:"Tingkat pengangguran terbuka (TPT) menurut pendidikan tertinggi.",
+        base:"TPT lulusan universitas 13,44% (TPT total 3,86%)", src:"BPS, Sakernas" }
+    ]},
+  { id:"MAC", en:"Machine", name:"Infrastruktur dan sarana", short:"Infrastruktur", color:"c2",
+    desc:"Jalan, layanan dasar, dan sarana produksi yang menentukan akses antarwilayah.",
+    vars:[
+      { id:"MAC1", s:"Konektivitas antarkecamatan", name:"Konektivitas dan aksesibilitas antarkecamatan", hyp:"H5",
+        def:"Kualitas jalan dan waktu tempuh yang menghubungkan desa dan kecamatan ke pusat ekonomi dan layanan.",
+        ind:"Indeks Infrastruktur; panjang jalan baik; waktu tempuh ke pusat layanan.",
+        base:"Indeks Infrastruktur 60,34 (target 51,95); data waktu tempuh perlu diminta", src:"Bapperida (Evaluasi RPJMD); Dinas PUPR" },
+      { id:"MAC2", s:"Akses layanan dasar", name:"Akses layanan dasar pendidikan dan kesehatan", hyp:"H5",
+        def:"Jarak dan ketersediaan fasilitas pendidikan dan kesehatan, terutama di kecamatan berlereng curam.",
+        ind:"Jarak ke fasilitas; rasio fasilitas per penduduk menurut kecamatan.",
+        base:"Penduduk terkonsentrasi: 36,2% penduduk pada 21,9% luas (lima kecamatan dataran)", src:"BPS; Dinas Pendidikan; Dinas Kesehatan" },
+      { id:"MAC3", s:"Sarana produksi dan pasar", name:"Sarana produksi dan pasar", hyp:"H1",
+        def:"Irigasi, pasar, tempat pelelangan ikan, dan sarana pascapanen yang menopang pendapatan petani dan nelayan.",
+        ind:"Luas sawah teririgasi; jumlah pasar dan sarana pascapanen berfungsi.",
+        base:"Belum tersedia; diminta ke Dinas Pertanian, DKP, dan Disperindag", src:"Perangkat Daerah pengampu" }
+    ]},
+  { id:"MTD", en:"Method", name:"Kebijakan dan tata kelola program", short:"Kebijakan", color:"c3",
+    desc:"Arah belanja daerah, perlindungan sosial, dan program pemberdayaan.",
+    vars:[
+      { id:"MTD1", s:"Belanja daerah 2025", name:"Belanja daerah dan keberlanjutan program", hyp:"H4",
+        def:"Pengetatan belanja pemerintah pada 2025 yang diduga menekan permintaan dan pendapatan kelompok bawah.",
+        ind:"Realisasi belanja modal dan belanja sosial 2023 sampai 2025.",
+        base:"Dugaan RKPD 2027 dan Evaluasi RPJMD; belum diuji dengan data belanja", src:"Bapperida; BPKAD" },
+      { id:"MTD2", s:"Ketepatan sasaran bansos", name:"Ketepatan sasaran perlindungan sosial", hyp:"H4",
+        def:"Kesesuaian penerima bantuan sosial dengan kelompok pengeluaran terbawah.",
+        ind:"Persentase penerima bantuan menurut desil kesejahteraan; exclusion dan inclusion error.",
+        base:"Belum diukur; DTSEN by name by address belum dimanfaatkan penuh", src:"Dinas Sosial; Kemensos (DTSEN)" },
+      { id:"MTD3", s:"Pemberdayaan UMKM", name:"Pemberdayaan UMKM, koperasi, dan kewirausahaan", hyp:"H3",
+        def:"Jangkauan dan dampak program usaha bagi rumah tangga berpenghasilan rendah, termasuk perempuan.",
+        ind:"Jumlah UMKM binaan; akses pembiayaan; kenaikan omzet usaha mikro.",
+        base:"Belum diukur; diminta ke Dinas Koperasi dan UKM", src:"Dinas Koperasi dan UKM" }
+    ]},
+  { id:"MTR", en:"Material", name:"Struktur ekonomi dan aset produktif", short:"Struktur ekonomi", color:"c4",
+    desc:"Produktivitas sektor, nilai tambah, dan akses modal.",
+    vars:[
+      { id:"MTR1", s:"Produktivitas pertanian", name:"Produktivitas sektor pertanian", hyp:"H1",
+        def:"Nilai tambah per pekerja di sektor primer yang menyerap tenaga kerja terbesar.",
+        ind:"PDRB per pekerja sektor primer dibanding sekunder; pangsa pertanian dalam PDRB.",
+        base:"Primer Rp37,67 juta vs sekunder Rp56,56 juta per pekerja; pertanian 24,83% PDRB", src:"BPS, PDRB dan Sakernas" },
+      { id:"MTR2", s:"Hilirisasi industri", name:"Nilai tambah dan hilirisasi industri pengolahan", hyp:"H1",
+        def:"Kemampuan industri pengolahan menaikkan nilai tambah hasil pertanian dan perikanan lokal.",
+        ind:"Pangsa dan pertumbuhan industri pengolahan; jumlah industri hilir.",
+        base:"Industri pengolahan 19,96% PDRB (17,98% pada 2021); tumbuh 7,73% pada 2025", src:"BPS, PDRB" },
+      { id:"MTR3", s:"Akses modal kelompok bawah", name:"Akses modal dan aset produktif kelompok bawah", hyp:"H1",
+        def:"Kemampuan rumah tangga bawah memperoleh kredit, lahan, dan peralatan usaha.",
+        ind:"Penyaluran KUR dan kredit mikro menurut desil; kepemilikan lahan garapan.",
+        base:"Belum diukur; perlu data perbankan dan Dinas Koperasi", src:"OJK/perbankan; Dinas Koperasi dan UKM" }
+    ]},
+  { id:"MSR", en:"Measurement", name:"Data dan pengukuran", short:"Data", color:"c5",
+    desc:"Kualitas, ketersediaan, dan konsistensi data yang menjadi dasar kebijakan.",
+    vars:[
+      { id:"MSR1", s:"Kualitas data sasaran", name:"Kualitas data sasaran (DTSEN)", hyp:"H6",
+        def:"Ketersediaan data rumah tangga by name by address untuk menentukan penerima program.",
+        ind:"Cakupan dan pemutakhiran DTSEN; tingkat pemanfaatan oleh Perangkat Daerah.",
+        base:"Akses DTSEN by name by address belum dimanfaatkan penuh", src:"Kemensos; Dinas Sosial" },
+      { id:"MSR2", s:"Data tingkat kecamatan", name:"Ketersediaan data tingkat kecamatan", hyp:"H6",
+        def:"Data pengeluaran dan kemiskinan menurut kecamatan untuk analisis spasial.",
+        ind:"Jumlah indikator kesejahteraan yang tersedia per kecamatan.",
+        base:"Pengeluaran dan kemiskinan kecamatan tidak dipublikasikan BPS", src:"BPS Kab. Trenggalek" },
+      { id:"MSR3", s:"Konsistensi angka", name:"Konsistensi angka antardokumen", hyp:"H6",
+        def:"Kesamaan angka indikator yang sama pada dokumen perencanaan yang berbeda.",
+        ind:"Jumlah indikator dengan selisih angka antardokumen.",
+        base:"Gini 2023: 0,336 (teks RKPD) vs 0,33 (grafik); seri TPT berbeda antardokumen", src:"RKPD 2027; Evaluasi RPJMD; BPS" }
+    ]},
+  { id:"ENV", en:"Environment", name:"Lingkungan dan wilayah", short:"Wilayah", color:"c6",
+    desc:"Topografi, kerentanan bencana, dan sebaran penduduk.",
+    vars:[
+      { id:"ENV1", s:"Topografi dan lereng", name:"Topografi dan kemiringan lereng", hyp:"H5",
+        def:"Kondisi fisik wilayah berlereng curam yang menaikkan biaya pembangunan dan membatasi lahan produktif.",
+        ind:"Persentase wilayah dengan lereng lebih dari 25 persen.",
+        base:"48,49% wilayah berlereng >25%", src:"BPS, Kab. Trenggalek Dalam Angka" },
+      { id:"ENV2", s:"Kerentanan bencana", name:"Kerentanan bencana dan kerusakan lingkungan", hyp:"H5",
+        def:"Risiko longsor, banjir, dan bencana lain yang merusak aset dan pendapatan rumah tangga rentan.",
+        ind:"Indeks Risiko Bencana; jumlah kejadian dan kerugian.",
+        base:"Indeks Risiko Bencana 120,85 (target 138,59)", src:"BPBD; Bapperida (IKU)" },
+      { id:"ENV3", s:"Disparitas antarkecamatan", name:"Konsentrasi penduduk dan disparitas antarkecamatan", hyp:"H5",
+        def:"Pemusatan penduduk dan kegiatan ekonomi di kecamatan dataran dibanding kecamatan pinggiran.",
+        ind:"Indeks Theil antarkecamatan; kepadatan penduduk; indeks Moran.",
+        base:"36,2% penduduk menempati 21,9% luas wilayah (lima kecamatan dataran)", src:"BPS; perhitungan konsultan" }
+    ]}
+];
+const VARS = []; CRIT.forEach(c=>c.vars.forEach(v=>{ v.crit=c.id; VARS.push(v); }));
+const VAR = Object.fromEntries(VARS.map(v=>[v.id,v]));
+const CR = Object.fromEntries(CRIT.map(c=>[c.id,c]));
+const SAATY = [
+  [1,"Sama berpengaruh","Kedua faktor memberi pengaruh yang sama terhadap kenaikan Gini."],
+  [3,"Sedikit lebih berpengaruh","Pengalaman dan data sedikit mendukung satu faktor atas yang lain."],
+  [5,"Lebih berpengaruh","Pengalaman dan data kuat mendukung satu faktor atas yang lain."],
+  [7,"Sangat lebih berpengaruh","Satu faktor sangat dominan dan terbukti dalam praktik."],
+  [9,"Mutlak lebih berpengaruh","Bukti yang mendukung satu faktor atas yang lain berada pada tingkat tertinggi."],
+  ["2, 4, 6, 8","Nilai antara","Dipakai saat penilaian berada di antara dua tingkat di atas."]
+];
+
+/* ===== MESIN AHP (fungsi murni, dapat diuji di Node) ===== */
+const RI = [0,0,0.58,0.90,1.12,1.24,1.32,1.41,1.45,1.49];
+const CR_LIMIT = 0.10;
+// Struktur matriks: 'C' (kriteria) dan 'S:<kriteria>' (variabel dalam kriteria)
+const MATS = [{id:"C", title:"Kriteria utama (kategori 6M)", items:CRIT.map(c=>c.id)}]
+  .concat(CRIT.map(c=>({id:"S:"+c.id, title:c.en+" · "+c.name, items:c.vars.map(v=>v.id), crit:c.id})));
+const MAT = Object.fromEntries(MATS.map(m=>[m.id,m]));
+function pairsOf(items){ const o=[]; for(let i=0;i<items.length;i++) for(let j=i+1;j<items.length;j++) o.push([items[i],items[j]]); return o; }
+MATS.forEach(m=>{ m.pairs = pairsOf(m.items).map(([a,b])=>({a,b,key:m.id+"|"+a+"|"+b})); });
+const ALL_KEYS = MATS.flatMap(m=>m.pairs.map(p=>p.key));
+const TOTAL_PAIRS = ALL_KEYS.length; // 15 + 6*3 = 33
+
+// k = -8..8 ; k>0 kiri lebih berpengaruh (rasio k+1), k<0 kanan lebih berpengaruh (rasio 1/(|k|+1)), 0 setara
+function ratioFromK(k){ return k===0 ? 1 : (k>0 ? k+1 : 1/(1-k)); }
+
+function buildMatrix(m, j){
+  const n=m.items.length, idx=Object.fromEntries(m.items.map((x,i)=>[x,i]));
+  const A=Array.from({length:n},()=>Array(n).fill(1));
+  let answered=0;
+  m.pairs.forEach(p=>{
+    const k=j && j[p.key];
+    if(typeof k==="number" && isFinite(k)){
+      const r=ratioFromK(k), a=idx[p.a], b=idx[p.b]; A[a][b]=r; A[b][a]=1/r; answered++;
+    }
+  });
+  return {A, answered, total:m.pairs.length, complete: answered===m.pairs.length};
+}
+
+function priority(A){
+  const n=A.length; let w=Array(n).fill(1/n);
+  for(let it=0; it<500; it++){
+    const v=A.map(r=>r.reduce((s,a,i)=>s+a*w[i],0)); const s=v.reduce((x,y)=>x+y,0);
+    const nw=v.map(x=>x/s); const d=nw.reduce((m,x,i)=>Math.max(m,Math.abs(x-w[i])),0); w=nw; if(d<1e-13) break;
+  }
+  const Aw=A.map(r=>r.reduce((s,a,i)=>s+a*w[i],0));
+  const lmax=Aw.reduce((s,x,i)=>s+x/w[i],0)/n;
+  const ci = n>2 ? Math.max(0,(lmax-n)/(n-1)) : 0;
+  const cr = n>2 ? ci/RI[n-1] : 0;
+  return {w, lmax, ci, cr};
+}
+
+// Pasangan yang paling menyimpang dari bobot turunan; untuk petunjuk perbaikan konsistensi
+function worstPair(m, A, w){
+  let best=null;
+  m.pairs.forEach(p=>{
+    const a=m.items.indexOf(p.a), b=m.items.indexOf(p.b);
+    const dev=Math.abs(Math.log(A[a][b]) - Math.log(w[a]/w[b]));
+    if(!best || dev>best.dev) best={pair:p, dev, implied:w[a]/w[b], given:A[a][b]};
+  });
+  return best;
+}
+function kFromRatio(r){ if(r>=1) return Math.min(8, Math.round(r)-1); return -Math.min(8, Math.round(1/r)-1); }
+
+function aggregate(items, mats){ // rata-rata geometrik tertimbang (AIJ)
+  const n=items.length, A=Array.from({length:n},()=>Array(n).fill(1)); const W=mats.reduce((s,x)=>s+x.wt,0);
+  for(let i=0;i<n;i++) for(let j=0;j<n;j++){ if(i===j) continue;
+    A[i][j]=Math.exp(mats.reduce((s,x)=>s+x.wt*Math.log(x.A[i][j]),0)/W); }
+  return A;
+}
+
+/* respondents: {uid:{weight}} ; ahp: {uid:{j:{key:k}}} ; opts:{onlyConsistent} */
+function computeAHP(respondents, ahp, opts){
+  opts=opts||{};
+  const per={}; // per[uid][mid] = {answered,total,complete,w,cr,lmax,ci,A}
+  const uids=Object.keys(ahp||{}).filter(u=>respondents && respondents[u]);
+  uids.forEach(u=>{
+    per[u]={}; const j=(ahp[u]&&ahp[u].j)||{};
+    MATS.forEach(m=>{
+      const b=buildMatrix(m,j); const o={answered:b.answered,total:b.total,complete:b.complete};
+      if(b.complete){ const pr=priority(b.A); Object.assign(o,pr,{A:b.A}); }
+      per[u][m.id]=o;
+    });
+  });
+  const groups={};
+  MATS.forEach(m=>{
+    const inc=uids.filter(u=>per[u][m.id].complete && (!opts.onlyConsistent || per[u][m.id].cr<=CR_LIMIT));
+    const g={n:inc.length, items:m.items, provisional:false};
+    if(inc.length){
+      const A=aggregate(m.items, inc.map(u=>({A:per[u][m.id].A, wt:Math.max(0.0001,+(respondents[u].weight??1))})));
+      const pr=priority(A);
+      g.A=A; g.w=Object.fromEntries(m.items.map((x,i)=>[x,pr.w[i]])); g.cr=pr.cr; g.lmax=pr.lmax; g.ci=pr.ci;
+      g.range=Object.fromEntries(m.items.map((x,i)=>{ const vals=inc.map(u=>per[u][m.id].w[i]); return [x,[Math.min(...vals),Math.max(...vals)]]; }));
+      g.hint = pr.cr>CR_LIMIT ? worstPair(m,A,pr.w) : null;
+    } else {
+      g.provisional=true; g.w=Object.fromEntries(m.items.map(x=>[x,1/m.items.length])); g.cr=0; g.lmax=m.items.length; g.ci=0; g.range=null;
+    }
+    groups[m.id]=g;
+  });
+  const global={}, globalRange={};
+  CRIT.forEach(c=>{
+    c.vars.forEach(v=>{
+      global[v.id]=groups.C.w[c.id]*groups["S:"+c.id].w[v.id];
+      const both=uids.filter(u=>per[u].C.complete && per[u]["S:"+c.id].complete);
+      if(both.length){ const ci=MAT.C.items.indexOf(c.id), vi=MAT["S:"+c.id].items.indexOf(v.id);
+        const vals=both.map(u=>per[u].C.w[ci]*per[u]["S:"+c.id].w[vi]); globalRange[v.id]=[Math.min(...vals),Math.max(...vals)]; }
+    });
+  });
+  // kemajuan responden
+  const prog={};
+  uids.forEach(u=>{
+    const answered=MATS.reduce((s,m)=>s+per[u][m.id].answered,0);
+    const crs=MATS.filter(m=>per[u][m.id].complete).map(m=>per[u][m.id].cr);
+    prog[u]={answered, total:TOTAL_PAIRS, pct:answered/TOTAL_PAIRS, maxCR: crs.length?Math.max(...crs):null,
+      crCrit: per[u].C.complete?per[u].C.cr:null, bad:MATS.filter(m=>per[u][m.id].complete && per[u][m.id].cr>CR_LIMIT).map(m=>m.id),
+      done: answered===TOTAL_PAIRS};
+  });
+  const provisional = groups.C.provisional;
+  return {per, groups, global, globalRange, prog, provisional, nResp:uids.length,
+          nComplete:uids.filter(u=>prog[u].done).length};
+}
+
+/* ===== Konfirmasi indikator dan Fishbone ===== */
+const VOTE_W = {S:1, C:0.5, T:0};
+function computeConfirm(respondents, confirm, globalW, thr){
+  thr = (typeof thr==="number") ? thr : 0.7;
+  const out={}; let totalVoters=new Set(), submitted=0;
+  VARS.forEach(v=>{ out[v.id]={S:0,C:0,T:0,wS:0,wC:0,wT:0,n:0,w:0,notes:[]}; });
+  Object.keys(confirm||{}).forEach(u=>{
+    if(!respondents || !respondents[u]) return;
+    const c=confirm[u]; const wt=Math.max(0.0001,+(respondents[u].weight??1)); const votes=c.votes||{}; let any=false;
+    VARS.forEach(v=>{ const x=votes[v.id]; if(x==="S"||x==="C"||x==="T"){ const o=out[v.id]; o[x]++; o["w"+x]+=wt; o.n++; o.w+=wt; any=true;
+        const note=(c.notes||{})[v.id]; if(note) o.notes.push({uid:u,vote:x,text:note}); } });
+    if(any) totalVoters.add(u); if(c.submitted) submitted++;
+  });
+  let conf=[];
+  VARS.forEach(v=>{
+    const o=out[v.id]; o.id=v.id; o.crit=v.crit; o.gw=globalW[v.id];
+    o.konsensus = o.n? (o.wS+0.5*o.wC)/o.w : 0;
+    o.status = !o.n ? "belum" : (o.konsensus>=thr ? "ok" : (o.wT/o.w>=0.5 ? "tolak" : "bahas"));
+    o.R = o.n ? o.gw*o.konsensus : 0;
+    if(o.status==="ok") conf.push(o);
+  });
+  const sumR=conf.reduce((s,o)=>s+o.R,0);
+  VARS.forEach(v=>{ const o=out[v.id]; o.share = (o.status==="ok" && sumR>0)? o.R/sumR : 0; });
+  const cat={}; CRIT.forEach(c=>{ cat[c.id]={id:c.id, share:0, gw:0, nOk:0, n:c.vars.length}; });
+  VARS.forEach(v=>{ const o=out[v.id]; cat[v.crit].share+=o.share; cat[v.crit].gw+=o.gw; if(o.status==="ok") cat[v.crit].nOk++; });
+  const ranked=conf.slice().sort((a,b)=>b.R-a.R); let cum=0; ranked.forEach(o=>{ cum+=o.share; o.cum=cum; });
+  const cnt={ok:0,bahas:0,tolak:0,belum:0}; VARS.forEach(v=>cnt[out[v.id].status]++);
+  return {items:out, cat, ranked, cnt, sumR, voters:totalVoters.size, submitted, thr};
+}
+
+/* ===== Data contoh (hanya di peramban, tidak disimpan) ===== */
+function mulberry(a){ return function(){ a|=0; a=a+0x6D2B79F5|0; let t=Math.imul(a^a>>>15,1|a); t=t+Math.imul(t^t>>>7,61|t)^t; return ((t^t>>>14)>>>0)/4294967296; }; }
+function gauss(r){ let u=0,v=0; while(!u)u=r(); while(!v)v=r(); return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v); }
+function makeDemo(){
+  const r=mulberry(20261029);
+  const base={ C:{MAN:.23,MAC:.11,MTD:.17,MTR:.25,MSR:.09,ENV:.15},
+    "S:MAN":{MAN1:.46,MAN2:.30,MAN3:.24}, "S:MAC":{MAC1:.42,MAC2:.33,MAC3:.25}, "S:MTD":{MTD1:.30,MTD2:.45,MTD3:.25},
+    "S:MTR":{MTR1:.52,MTR2:.28,MTR3:.20}, "S:MSR":{MSR1:.50,MSR2:.30,MSR3:.20}, "S:ENV":{ENV1:.34,ENV2:.22,ENV3:.44} };
+  const people=[
+    ["Rina Wulandari","Bapperida","Kepala Bidang Ekonomi",0.04],["Agus Prasetyo","Dinas Koperasi dan UKM","Kepala Bidang",0.08],
+    ["Dewi Lestari","Dinas Sosial","Kepala Seksi",0.05],["Hendra Kusuma","BPS Kabupaten Trenggalek","Statistisi Ahli",0.03],
+    ["Prof. Slamet Riyadi","Akademisi","Dosen Ekonomi Pembangunan",0.06],["Yuliani Putri","Dinas Pertanian dan Pangan","Kepala Bidang",0.12],
+    ["Bagus Santoso","Pelaku usaha","Ketua Asosiasi UMKM",0.07],["Fitri Handayani","Komunitas","Perwakilan Perempuan Desa",0.35],
+    ["Eko Nugroho","Dinas Pendidikan","Kepala Seksi",0.09]];
+  const respondents={}, ahp={}, confirm={};
+  people.forEach((p,i)=>{
+    const uid="demo"+(i+1); respondents[uid]={name:p[0],org:p[1],role:p[2],weight:1,createdAt:Date.now()-86400000*(9-i),demo:true};
+    const j={}; const sigma=p[3];
+    // responden terakhir hanya mengisi sebagian, satu responden memiliki konsistensi rendah
+    const limit = (i===8)? 21 : TOTAL_PAIRS; let c=0;
+    MATS.forEach(m=>{ m.pairs.forEach(pr=>{ c++; if(c>limit) return;
+      const wa=base[m.id][pr.a], wb=base[m.id][pr.b]; const ratio=(wa/wb)*Math.exp(gauss(r)*sigma*3);
+      j[pr.key]=kFromRatio(ratio); }); });
+    ahp[uid]={j, updatedAt:Date.now()-3600000*(i+1)};
+    const votes={}, notes={}; const pOk={MAN1:.95,MAN2:.8,MAN3:.7,MAC1:.85,MAC2:.8,MAC3:.55,MTD1:.7,MTD2:.9,MTD3:.65,MTR1:.97,MTR2:.8,MTR3:.45,MSR1:.85,MSR2:.75,MSR3:.7,ENV1:.9,ENV2:.6,ENV3:.8};
+    if(i<8) VARS.forEach(v=>{ const x=r(); const p=pOk[v.id];
+      if(x<p*0.8) votes[v.id]="S"; else if(x<p) { votes[v.id]="C"; notes[v.id]="Perlu dilengkapi data pendukung per kecamatan."; } else votes[v.id]="T"; });
+    confirm[uid]={votes, notes, proposals: i===3?["Rasio ketergantungan penduduk menurut kecamatan"]:[], submitted:i<7, updatedAt:Date.now()-1800000*(i+1)};
+  });
+  return {respondents, ahp, confirm, config:{target:10, threshold:0.7}};
+}
+
+
+/* ===== Lapisan penyimpanan: db Claude Artifact (bersama, langsung) atau localStorage (mandiri, satu peramban) ===== */
+async function makeStore(){
+  let db=null,user=null;
+  try{ if(window.claude && window.claude.use){ db=await window.claude.use("db"); } }catch(e){ db=null; }
+  if(db){ try{ user=await window.claude.use("user"); }catch(e){ user=null; } }
+  if(db){
+    let uid=null,isAdmin=false,canWrite=null;
+    try{ uid = user ? await user.id() : null; }catch(e){}
+    try{ isAdmin = user ? await user.canEdit() : false; }catch(e){}
+    try{ canWrite = user ? await user.can("data.write") : null; }catch(e){}
+    const q={};
+    const enqueue=(path,fn)=>{ const prev=q[path]||Promise.resolve(); const p=prev.then(fn); q[path]=p.catch(()=>{}); return p; };
+    return { kind:"db", uid, isAdmin, canWrite,
+      sub(coll,cb,err){ return db.collection(coll).onSnapshot(s=>{ const m={}; s.docs.forEach(d=>{ m[d.id]=d.data(); }); cb(m); }, err||function(e){console.warn(e);}); },
+      subDoc(path,cb,err){ return db.doc(path).onSnapshot(s=>cb(s.exists?s.data():{}), err||function(e){console.warn(e);}); },
+      put(coll,id,data){ return enqueue(coll+"/"+id,()=>db.doc(coll+"/"+id).set(data)); },
+      del(coll,id){ return enqueue(coll+"/"+id,()=>db.doc(coll+"/"+id).delete()); } };
+  }
+  // ----- mandiri: localStorage (dengan cadangan memori) -----
+  const KEY="ahp-trenggalek-v1:"; const mem={}; const subs={};
+  const read=c=>{ try{ return JSON.parse(localStorage.getItem(KEY+c)||"{}"); }catch(e){ return mem[c]||{}; } };
+  const write=(c,v)=>{ mem[c]=v; try{ localStorage.setItem(KEY+c,JSON.stringify(v)); }catch(e){} };
+  const fire=c=>(subs[c]||[]).forEach(f=>f(read(c)));
+  window.addEventListener("storage",e=>{ if(e.key&&e.key.startsWith(KEY)) fire(e.key.slice(KEY.length)); });
+  let uid; try{ uid=localStorage.getItem(KEY+"uid"); if(!uid){ uid="u"+Math.random().toString(36).slice(2,10); localStorage.setItem(KEY+"uid",uid); } }catch(e){ uid="u"+Math.random().toString(36).slice(2,10); }
+  const add=(c,f)=>{ (subs[c]=subs[c]||[]).push(f); setTimeout(()=>f(read(c)),0); return ()=>{ subs[c]=subs[c].filter(x=>x!==f); }; };
+  return { kind:"local", uid, isAdmin:true, canWrite:true,
+    sub(coll,cb){ return add(coll,cb); },
+    subDoc(path,cb){ const [c,id]=path.split("/"); return add(c,m=>cb(m[id]||{})); },
+    put(coll,id,data){ const m=read(coll); m[id]=JSON.parse(JSON.stringify(data)); write(coll,m); fire(coll); return Promise.resolve(); },
+    del(coll,id){ const m=read(coll); delete m[id]; write(coll,m); fire(coll); return Promise.resolve(); } };
+}
+
+/* ===== UTIL ===== */
+const $=(s,r)=>(r||document).querySelector(s);
+const $$=(s,r)=>Array.from((r||document).querySelectorAll(s));
+const esc=s=>String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const nf=(x,d=1)=>x.toLocaleString("id-ID",{minimumFractionDigits:d,maximumFractionDigits:d});
+const pc=(x,d=1)=>nf(x*100,d)+"%";
+const ORGS=["Bapperida","Perangkat Daerah (OPD) pengampu","BPS Kabupaten Trenggalek","Akademisi","Pelaku usaha","Komunitas / masyarakat","Tim konsultan","Lainnya"];
+function ago(ts){ if(!ts) return "belum ada"; const d=(Date.now()-ts)/1000; if(d<60) return "baru saja"; if(d<3600) return Math.floor(d/60)+" menit lalu"; if(d<86400) return Math.floor(d/3600)+" jam lalu"; return Math.floor(d/86400)+" hari lalu"; }
+const STAT={ok:["✓","Terkonfirmasi"],bahas:["!","Perlu dibahas"],tolak:["✕","Ditolak"],belum:["○","Belum dinilai"]};
+const chipS=s=>`<span class="chip ${s}"><span aria-hidden="true">${STAT[s][0]}</span>${STAT[s][1]}</span>`;
+const chipCR=(cr)=>cr==null?`<span class="chip belum">belum lengkap</span>`:(cr<=CR_LIMIT?`<span class="chip cr-ok"><span aria-hidden="true">✓</span>CR ${nf(cr,3)}</span>`:`<span class="chip cr-bad"><span aria-hidden="true">!</span>CR ${nf(cr,3)}</span>`);
+const tipA=(t,b)=>`data-tip="${esc(t)}|${esc(b||"")}"`;
+
+/* ===== STATE ===== */
+const S={ view:"ringkasan", uid:null, isAdmin:false, canWrite:null, kind:"local", live:false, ver:0,
+  cfg:{}, resp:{}, ahp:{}, conf:{}, got:{}, demo:false, only:false, resSel:"group", step:"C", thr:null,
+  fb:{metric:"kontribusi", all:true, sel:null},
+  mine:{j:{},votes:{},notes:{},proposals:[],submitted:false}, mineLoaded:false, dirty:{ahp:false,conf:false}, sv:{state:"idle",msg:""} };
+let STORE=null, DEMO=null, MEMO=null, MEMO_V=-1;
+const bump=()=>{ S.ver++; };
+
+function respEff(resp,cfg){ const o={}; Object.keys(resp||{}).forEach(u=>{ o[u]=Object.assign({},resp[u],{weight:(cfg&&cfg.weights&&cfg.weights[u]!=null)?+cfg.weights[u]:1}); }); return o; }
+function src(){
+  if(S.demo){ if(!DEMO) DEMO=makeDemo(); return {resp:DEMO.respondents, ahp:DEMO.ahp, conf:DEMO.confirm, cfg:DEMO.config}; }
+  const ahp=Object.assign({},S.ahp), conf=Object.assign({},S.conf);
+  Object.keys(S.resp).forEach(u=>{ if(!ahp[u]) ahp[u]={j:{}}; });
+  if(S.uid && S.resp[S.uid]){
+    ahp[S.uid]=Object.assign({},ahp[S.uid],{j:S.mine.j});
+    conf[S.uid]=Object.assign({},conf[S.uid],{votes:S.mine.votes,notes:S.mine.notes,proposals:S.mine.proposals,submitted:S.mine.submitted});
+  }
+  return {resp:S.resp, ahp, conf, cfg:S.cfg};
+}
+function calc(){
+  if(MEMO && MEMO_V===S.ver+(S.demo?100000:0)+(S.only?500000:0)+(S.thr!=null?Math.round(S.thr*1000)*7:0)) return MEMO;
+  const d=src(), R=respEff(d.resp,d.cfg);
+  const A=computeAHP(R,d.ahp,{onlyConsistent:S.only});
+  const thr=(S.thr!=null)?S.thr:((d.cfg&&d.cfg.threshold)||0.7);
+  const K=computeConfirm(R,d.conf,A.global,thr);
+  MEMO={d,R,A,K,thr,target:+(d.cfg&&d.cfg.target)||0}; MEMO_V=S.ver+(S.demo?100000:0)+(S.only?500000:0)+(S.thr!=null?Math.round(S.thr*1000)*7:0); return MEMO;
+}
+function rankedVars(A){ return VARS.slice().sort((a,b)=>A.global[b.id]-A.global[a.id]); }
+function lastUpdate(d){ let t=0; Object.values(d.ahp||{}).forEach(x=>{ if(x&&x.updatedAt>t) t=x.updatedAt; }); Object.values(d.conf||{}).forEach(x=>{ if(x&&x.updatedAt>t) t=x.updatedAt; }); return t; }
+
+/* ===== Komponen kecil ===== */
+function hbar(o){ // {name,cc,frac,val,rank,tip,range,max}
+  const w=Math.max(0,Math.min(100,o.frac*100));
+  let wh=""; if(o.range){ const a=Math.min(100,o.range[0]/o.max*100), b=Math.min(100,o.range[1]/o.max*100); wh=`<span class="whisk" style="left:${a}%;width:${Math.max(0,b-a)}%"></span>`; }
+  return `<div class="hb f-${o.cc}" ${o.tip||""}><div class="nm">${o.rank!=null?`<span class="rank">${o.rank}</span>`:""}<i class="cdot ${o.cc}"></i><span>${esc(o.name)}</span></div><div class="track"><div class="fill" style="width:${w}%"></div>${wh}</div><div class="val num">${o.val}</div></div>`;
+}
+function emptyBox(t,b,btn){ return `<div class="empty"><b>${t}</b>${b}${btn?`<div style="margin-top:12px">${btn}</div>`:""}</div>`; }
+function toast(msg){ const t=document.createElement("div"); t.className="toast"; t.textContent=msg; document.body.appendChild(t); setTimeout(()=>t.remove(),2600); }
+const goBtn=(v,label,cls)=>`<button class="btn ${cls||""}" data-go="${v}">${label}</button>`;
+
+/* ===== RINGKASAN ===== */
+const V={};
+V.ringkasan={
+  title:"Ringkasan",
+  render(){
+    const C=calc(), A=C.A, K=C.K; const rk=rankedVars(A); const top=rk[0];
+    const nRegistered=Object.keys(C.d.resp).length; const tgt=C.target;
+    const prov=A.provisional;
+    const crOk=MATS.filter(m=>A.groups[m.id].n>0 && A.groups[m.id].cr<=CR_LIMIT).length, crN=MATS.filter(m=>A.groups[m.id].n>0).length;
+    const gC=A.groups.C;
+    const kpi=`<div class="kpis">
+      <div class="kpi"><div class="l">Responden terdaftar</div><div class="v num">${nRegistered}${tgt?`<small>dari ${tgt} target</small>`:""}</div>
+        <div class="meter"><i style="width:${tgt?Math.min(100,nRegistered/tgt*100):(nRegistered?100:0)}%"></i></div>
+        <div class="s">${A.nComplete} selesai mengisi ${TOTAL_PAIRS} perbandingan</div></div>
+      <div class="kpi"><div class="l">Konsistensi kelompok</div><div class="v num">${prov?"–":nf(gC.cr,3)}<small>CR kriteria</small></div>
+        <div class="s">${crN?`${crOk} dari ${crN} matriks ≤ ${nf(CR_LIMIT,2)}`:"menunggu jawaban lengkap"} ${prov?"":chipCR(gC.cr)}</div></div>
+      <div class="kpi"><div class="l">Indikator terkonfirmasi</div><div class="v num">${K.cnt.ok}<small>dari ${VARS.length}</small></div>
+        <div class="meter"><i style="width:${K.cnt.ok/VARS.length*100}%;background:var(--good)"></i></div>
+        <div class="s">${K.cnt.bahas} dibahas · ${K.cnt.tolak} ditolak · ${K.cnt.belum} belum dinilai</div></div>
+      <div class="kpi"><div class="l">Variabel prioritas utama</div><div class="v" style="font-size:19px;line-height:1.25">${prov?"–":esc(top.s)}</div>
+        <div class="s">${prov?"bobot sementara seimbang":`bobot global <b class="num">${pc(A.global[top.id])}</b> · ${esc(CR[top.crit].en)}`}</div></div>
+    </div>`;
+    const notice = prov ? `<div class="banner info"><span><b>Belum ada hasil.</b> Bobot ditampilkan seimbang sampai ada responden yang menyelesaikan satu matriks penuh. Hasil akan muncul dan berubah otomatis begitu jawaban masuk.</span>${S.demo?"":goBtn("instrumen","Isi instrumen","primary")}</div>`:"";
+    const crit=CRIT.slice().sort((a,b)=>gC.w[b.id]-gC.w[a.id]);
+    const maxc=Math.max(...crit.map(c=>gC.w[c.id]));
+    const critBars=crit.map((c,i)=>hbar({name:c.en+" · "+c.short,cc:c.color,frac:gC.w[c.id]/maxc,val:pc(gC.w[c.id]),rank:i+1,
+      tip:tipA(c.en+" · "+c.name, "Bobot kriteria "+pc(gC.w[c.id],1)+(gC.range?" (rentang antarresponden "+pc(gC.range[c.id][0],0)+" sampai "+pc(gC.range[c.id][1],0)+")":" (sementara)"))})).join("");
+    const maxg=A.global[rk[0].id];
+    const varBars=rk.slice(0,10).map((v,i)=>hbar({name:v.s,cc:CR[v.crit].color,frac:A.global[v.id]/maxg,val:pc(A.global[v.id]),rank:i+1,
+      tip:tipA(v.name,"Bobot global "+pc(A.global[v.id],2)+" = kriteria "+pc(gC.w[v.crit],1)+" × lokal "+pc(A.groups["S:"+v.crit].w[v.id],1))})).join("");
+    const tot=VARS.length; const seg=(k,c)=>`<i class="${c}" style="width:${K.cnt[k]/tot*100}%" ${tipA(STAT[k][1],K.cnt[k]+" dari "+tot+" indikator")}></i>`;
+    const statusBar=`<div class="stack" style="height:18px"><i style="width:${K.cnt.ok/tot*100}%;background:var(--good)" ${tipA("Terkonfirmasi",K.cnt.ok+" dari "+tot)}></i><i style="width:${K.cnt.bahas/tot*100}%;background:var(--warn)" ${tipA("Perlu dibahas",K.cnt.bahas+" dari "+tot)}></i><i style="width:${K.cnt.tolak/tot*100}%;background:var(--crit)" ${tipA("Ditolak",K.cnt.tolak+" dari "+tot)}></i></div>
+      <div class="legend" style="margin-top:8px"><span><i style="background:var(--good)"></i>Terkonfirmasi ${K.cnt.ok}</span><span><i style="background:var(--warn)"></i>Perlu dibahas ${K.cnt.bahas}</span><span><i style="background:var(--crit)"></i>Ditolak ${K.cnt.tolak}</span><span><i style="background:var(--surface2);border:1px solid var(--line)"></i>Belum dinilai ${K.cnt.belum}</span></div>`;
+    const catRows=CRIT.map(c=>{ const k=K.cat[c.id]; return `<div class="hb f-${c.color}" style="grid-template-columns:minmax(110px,170px) minmax(0,1fr) 78px"><div class="nm"><i class="cdot ${c.color}"></i><span>${esc(c.en)}</span></div><div class="track"><div class="fill" style="width:${k.nOk/k.n*100}%"></div></div><div class="val num">${k.nOk}/${k.n} ok</div></div>`; }).join("");
+    const respRows=Object.keys(C.d.resp).map(u=>({u,r:C.d.resp[u],p:A.prog[u],c:C.d.conf[u]})).sort((a,b)=>(b.p?b.p.pct:0)-(a.p?a.p.pct:0));
+    const cvotes=(c)=>c&&c.votes?Object.keys(c.votes).length:0;
+    const tbl=respRows.length?`<div class="scrollx"><table class="t"><thead><tr><th>Responden</th><th>Instrumen AHP</th><th>Konsistensi</th><th>Konfirmasi</th><th>Diperbarui</th></tr></thead><tbody>${respRows.map(x=>{
+      const pct=x.p?x.p.pct:0; const ts=Math.max((C.d.ahp[x.u]||{}).updatedAt||0,(x.c||{}).updatedAt||0);
+      return `<tr><td><b>${esc(x.r.name)}</b><div class="sub">${esc(x.r.org||"")}</div></td>
+        <td style="min-width:120px"><div class="num" style="font-size:12.5px">${x.p?x.p.answered:0}/${TOTAL_PAIRS}</div><div class="meter" style="margin-top:4px"><i style="width:${pct*100}%"></i></div></td>
+        <td>${x.p&&x.p.maxCR!=null?chipCR(x.p.maxCR):'<span class="sub">–</span>'}</td>
+        <td><span class="num" style="font-size:12.5px">${cvotes(x.c)}/${VARS.length}</span> ${x.c&&x.c.submitted?'<span class="chip ok">final</span>':""}</td>
+        <td class="sub">${ago(ts)}</td></tr>`; }).join("")}</tbody></table></div>`:emptyBox("Belum ada responden","Stakeholder yang mengisi instrumen akan muncul di sini secara langsung.",S.demo?"":goBtn("instrumen","Mulai mengisi","primary"));
+    return `<div class="pagehead"><div><h1>Ringkasan hasil</h1><p>${esc(GOAL.title)}. Seluruh angka dihitung ulang otomatis setiap ada responden yang mengisi atau mengonfirmasi.</p></div></div>
+      ${notice}${kpi}
+      <div class="grid g-main">
+        <section class="panel"><div class="ph"><h2>Bobot kriteria (kategori 6M)</h2><small>garis hitam = rentang antarresponden</small></div>${critBars}</section>
+        <section class="panel"><div class="ph"><h2>Kesepakatan indikator untuk Fishbone</h2>${goBtn("fishbone","Buka Fishbone","sm")}</div>${statusBar}<div style="margin-top:14px">${catRows}</div></section>
+      </div>
+      <div class="grid g-eq">
+        <section class="panel"><div class="ph"><h2>10 variabel dengan bobot global tertinggi</h2>${goBtn("hasil","Semua hasil","sm")}</div>${varBars}</section>
+        <section class="panel"><div class="ph"><h2>Progres responden</h2><small>pembaruan ${ago(lastUpdate(C.d))}</small></div>${tbl}</section>
+      </div>`;
+  }
+};
+
+/* ===== HASIL AHP ===== */
+V.hasil={
+  title:"Hasil AHP",
+  render(){
+    const C0=calc(); let A=C0.A, label="Gabungan seluruh responden (rata-rata geometrik tertimbang)";
+    if(S.resSel!=="group" && C0.d.resp[S.resSel]){ const u=S.resSel; A=computeAHP(respEff({[u]:C0.d.resp[u]},C0.d.cfg),{[u]:C0.d.ahp[u]},{}); label="Responden: "+C0.d.resp[u].name; }
+    const gC=A.groups.C; const prov=A.provisional;
+    const opts=`<option value="group">Kelompok (semua responden)</option>`+Object.keys(C0.d.resp).map(u=>`<option value="${esc(u)}" ${S.resSel===u?"selected":""}>${esc(C0.d.resp[u].name)}</option>`).join("");
+    const ctrl=`<div class="panel"><div class="ctrl"><label>Tampilkan <select id="resSel" class="inp" style="width:auto">${opts}</select></label>
+      <label class="switch"><input type="checkbox" id="onlyC" ${S.only?"checked":""}> Hanya jawaban konsisten (CR ≤ ${nf(CR_LIMIT,2)})</label>
+      <span class="sub">${prov?"Belum ada matriks lengkap; bobot seimbang sementara.":esc(label)+" · "+gC.n+" responden pada matriks kriteria"}</span>
+      <button class="btn sm" id="dlCsv" style="margin-left:auto">Unduh CSV</button></div></div>`;
+    const crit=CRIT.slice().sort((a,b)=>gC.w[b.id]-gC.w[a.id]); const maxc=Math.max(...crit.map(c=>gC.range?gC.range[c.id][1]:gC.w[c.id]), ...crit.map(c=>gC.w[c.id]));
+    const critBars=crit.map((c,i)=>hbar({name:c.en+" · "+c.name,cc:c.color,frac:gC.w[c.id]/maxc,max:maxc,range:gC.range?gC.range[c.id]:null,val:pc(gC.w[c.id]),rank:i+1,
+      tip:tipA(c.en+" · "+c.name,"Bobot "+pc(gC.w[c.id],2)+(gC.range?"; rentang "+pc(gC.range[c.id][0],1)+" sampai "+pc(gC.range[c.id][1],1):""))})).join("");
+    const locals=CRIT.map(c=>{ const g=A.groups["S:"+c.id]; const mx=Math.max(...c.vars.map(v=>g.w[v.id]));
+      return `<section class="panel"><div class="ph"><h3 style="font-size:15px;display:flex;gap:8px;align-items:center"><i class="cdot ${c.color}"></i>${esc(c.en)} · ${esc(c.name)}</h3>${g.n?chipCR(g.cr):'<span class="chip belum">belum ada data</span>'}</div>
+        ${c.vars.map(v=>hbar({name:v.s,cc:c.color,frac:g.w[v.id]/mx,val:pc(g.w[v.id]),tip:tipA(v.name,"Bobot lokal "+pc(g.w[v.id],2)+" dalam kriteria "+c.en)})).join("")}
+        <div class="sub" style="margin-top:6px">${g.n} responden · λmaks ${nf(g.lmax,3)} · CI ${nf(g.ci,3)}</div></section>`; }).join("");
+    const rk=rankedVars(A); const mxg=A.global[rk[0].id];
+    const gtab=`<div class="scrollx"><table class="t"><thead><tr><th>#</th><th>Variabel (indikator)</th><th>Kriteria</th><th class="r">Bobot lokal</th><th style="min-width:200px">Bobot global</th><th class="r">Rentang</th></tr></thead><tbody>${rk.map((v,i)=>{ const c=CR[v.crit]; const rg=A.globalRange[v.id];
+      return `<tr><td class="num">${i+1}</td><td><b>${esc(v.name)}</b><div class="sub">${esc(v.id)} · ${esc(v.hyp)}</div></td><td><span style="display:inline-flex;gap:6px;align-items:center"><i class="cdot ${c.color}"></i>${esc(c.en)}</span></td>
+      <td class="r num">${pc(A.groups["S:"+v.crit].w[v.id])}</td>
+      <td><div style="display:flex;gap:8px;align-items:center"><div class="track f-${c.color}" style="flex:1"><div class="fill" style="width:${A.global[v.id]/mxg*100}%"></div></div><b class="num" style="min-width:52px;text-align:right">${pc(A.global[v.id],2)}</b></div></td>
+      <td class="r num sub">${rg?pc(rg[0],1)+"–"+pc(rg[1],1):"–"}</td></tr>`; }).join("")}</tbody></table></div>`;
+    // konsistensi
+    const uids=Object.keys(C0.A.per);
+    const head=MATS.map(m=>`<th class="r" ${tipA(m.title,"")}>${m.id==="C"?"Kriteria":m.id.slice(2)}</th>`).join("");
+    const rows=uids.map(u=>`<tr><td><b>${esc(C0.d.resp[u].name)}</b></td>${MATS.map(m=>{ const p=C0.A.per[u][m.id]; return `<td class="r">${p.complete?`<span class="cell ${p.cr<=CR_LIMIT?"g":"b"}" ${tipA(m.title,"CR "+nf(p.cr,3)+" · λmaks "+nf(p.lmax,3))}>${nf(p.cr,2)}</span>`:`<span class="cell n" ${tipA(m.title,p.answered+" dari "+p.total+" terisi")}>${p.answered}/${p.total}</span>`}</td>`; }).join("")}</tr>`).join("");
+    const grow=`<tr style="background:var(--surface2)"><td><b>Gabungan kelompok</b></td>${MATS.map(m=>{ const g=C0.A.groups[m.id]; return `<td class="r">${g.n?`<span class="cell ${g.cr<=CR_LIMIT?"g":"b"}">${nf(g.cr,2)}</span>`:`<span class="cell n">–</span>`}</td>`; }).join("")}</tr>`;
+    const cons=uids.length?`<div class="scrollx"><table class="t"><thead><tr><th>Responden</th>${head}</tr></thead><tbody>${rows}${grow}</tbody></table></div>
+      <p class="sub" style="margin-top:10px">Hijau: CR ≤ ${nf(CR_LIMIT,2)} (konsisten). Merah: CR di atas batas, responden perlu meninjau ulang perbandingan. Abu-abu: jumlah pasangan yang sudah terisi dari total pasangan pada matriks itu.</p>`:emptyBox("Belum ada jawaban","Tabel konsistensi muncul setelah responden mulai mengisi.");
+    const hints=MATS.filter(m=>A.groups[m.id].hint).map(m=>{ const h=A.groups[m.id].hint; const nameOf=id=>VAR[id]?VAR[id].s:CR[id].en;
+      return `<li><b>${esc(m.title)}</b>: periksa pasangan <b>${esc(nameOf(h.pair.a))}</b> dan <b>${esc(nameOf(h.pair.b))}</b>. Nilai yang diberikan ${nf(h.given,2)}, nilai yang selaras dengan jawaban lain sekitar ${nf(h.implied,2)}.</li>`; }).join("");
+    return `<div class="pagehead"><div><h1>Hasil pembobotan AHP</h1><p>Bobot dihitung dengan metode vektor eigen utama. Jawaban responden digabung dengan rata-rata geometrik tertimbang pada tiap perbandingan, lalu diuji konsistensinya.</p></div></div>
+      ${ctrl}
+      <section class="panel"><div class="ph"><h2>Bobot kriteria</h2><small>${pc(1,0)} dibagi ke 6 kategori · ${prov?"sementara":"CR "+nf(gC.cr,3)}</small></div>${critBars}</section>
+      <div><div class="ph" style="margin:0 0 10px"><h2 style="font-size:16px">Bobot lokal variabel dalam tiap kriteria</h2></div><div class="grid g3">${locals}</div></div>
+      <section class="panel"><div class="ph"><h2>Peringkat bobot global variabel</h2><small>bobot global = bobot kriteria × bobot lokal</small></div>${gtab}</section>
+      <section class="panel"><div class="ph"><h2>Uji konsistensi (CR)</h2><small>batas ${nf(CR_LIMIT,2)} (Saaty)</small></div>${cons}${hints?`<div class="banner" style="margin-top:12px;display:block"><b>Saran perbaikan kelompok</b><ul style="margin:6px 0 0;padding-left:18px">${hints}</ul></div>`:""}</section>`;
+  },
+  mount(){
+    $("#resSel").onchange=e=>{ S.resSel=e.target.value; render(); };
+    $("#onlyC").onchange=e=>{ S.only=e.target.checked; bump(); render(); };
+    $("#dlCsv").onclick=exportCsv;
+  }
+};
+async function exportCsv(){
+  const C=calc(), A=C.A, K=C.K;
+  const rows=[["id","variabel","kriteria","hipotesis","bobot_lokal","bobot_global","jumlah_penilai","sepakat","status","kontribusi_fishbone"]];
+  VARS.forEach(v=>{ const k=K.items[v.id]; rows.push([v.id,v.name,CR[v.crit].en,v.hyp,A.groups["S:"+v.crit].w[v.id].toFixed(5),A.global[v.id].toFixed(5),k.n,k.n?k.konsensus.toFixed(3):"",STAT[k.status][1],k.share.toFixed(5)]); });
+  const csv=rows.map(r=>r.map(x=>'"'+String(x).replace(/"/g,'""')+'"').join(",")).join("\n");
+  try{ const dl=window.claude&&window.claude.use?await window.claude.use("downloads"):null;
+    if(dl){ await dl.save({filename:"bobot-ahp-trenggalek.csv",data:csv}); toast("Berkas CSV siap disimpan"); return; } }catch(e){ if(e&&e.code==="declined") return; }
+  try{ const a=document.createElement("a"); a.href=URL.createObjectURL(new Blob([csv],{type:"text/csv"})); a.download="bobot-ahp-trenggalek.csv"; a.click(); }catch(e){ toast("Unduhan tidak tersedia di tampilan ini"); }
+}
+
+/* ===== PENYIMPANAN SISI HALAMAN ===== */
+const seq={ahp:0,conf:0}, timers={};
+function setSv(state,msg){ S.sv={state,msg:msg||""}; const el=$("#svState"); if(el) el.outerHTML=svHTML(); }
+function svHTML(){ const m={idle:"",saving:"Menyimpan…",saved:"Tersimpan",err:S.sv.msg||"Gagal menyimpan"}[S.sv.state]; return `<span id="svState" class="sv ${S.sv.state==="err"?"err":""}" role="status" aria-live="polite">${esc(m)}</span>`; }
+function queueSave(kind){ seq[kind]++; S.dirty[kind]=true; setSv("saving"); clearTimeout(timers[kind]); timers[kind]=setTimeout(()=>doSave(kind),700); }
+async function doSave(kind){
+  const s0=seq[kind];
+  try{
+    if(kind==="ahp") await STORE.put("ahp",S.uid,{j:S.mine.j,updatedAt:Date.now()});
+    else await STORE.put("confirm",S.uid,{votes:S.mine.votes,notes:S.mine.notes,proposals:S.mine.proposals,submitted:S.mine.submitted,updatedAt:Date.now()});
+    if(seq[kind]===s0){ S.dirty[kind]=false; setSv("saved"); } else { clearTimeout(timers[kind]); timers[kind]=setTimeout(()=>doSave(kind),300); }
+  }catch(e){ setSv("err", errText(e,"jawaban")); clearTimeout(timers[kind]); timers[kind]=setTimeout(()=>{ if(S.dirty[kind]) doSave(kind); },8000); }
+}
+const canEditData=()=>!S.demo && !!S.uid;
+function accessBanner(){
+  if(S.demo) return `<div class="banner"><span><b>Mode contoh aktif.</b> Data di bawah hanya ilustrasi dan tidak disimpan.</span><button class="btn sm" data-act="demoOff">Matikan mode contoh</button></div>`;
+  return "";
+}
+function profileForm(){
+  const r=S.resp[S.uid]||{};
+  return `<section class="panel"><div class="ph"><h2>${r.name?"Ubah profil":"Profil responden"}</h2><small>Dipakai untuk mengelompokkan jawaban, bukan untuk dinilai</small></div>
+    <div class="form" id="profForm">
+      <label>Nama lengkap<input id="pfName" maxlength="80" value="${esc(r.name||"")}" placeholder="mis. Rina Wulandari"></label>
+      <label>Instansi / unsur<select id="pfOrg">${ORGS.map(o=>`<option ${r.org===o?"selected":""}>${esc(o)}</option>`).join("")}</select></label>
+      <label>Jabatan atau peran<input id="pfRole" maxlength="80" value="${esc(r.role||"")}" placeholder="mis. Kepala Bidang Ekonomi"></label>
+      <div id="pfErr" class="form-err" role="alert" hidden></div>
+      <div><button class="btn primary" type="button" id="pfBtn" data-act="saveProf">${r.name?"Simpan perubahan":"Simpan dan mulai mengisi"}</button></div>
+    </div></section>`;
+}
+let savingProf=false;
+function pfError(msg){ const e=$("#pfErr"); if(e){ e.textContent=msg; e.hidden=!msg; } if(msg && msg.length<60) toast(msg); }
+function errText(e,what){
+  const c=e&&e.code, m=(e&&e.message)||"";
+  if(c==="invalid_argument") return "Penyimpanan ditolak ("+what+"). Kemungkinan akun Anda belum diberi akses Kontributor. Minta pemilik halaman memberi akses Kontributor, lalu muat ulang halaman. Rincian: "+(m||c);
+  if(c==="not_granted"||c==="capability_disabled"||c==="capability_removed"||c==="revoked") return "Basis data bersama tidak tersedia pada tampilan ini ("+c+"). Buka halaman dari tautan artefak di claude.ai, bukan sebagai berkas lepas.";
+  if(c==="resource_exhausted"||c==="unavailable") return "Server sedang sibuk. Tunggu sebentar lalu coba lagi. ("+c+")";
+  if(c==="quota_exceeded") return "Kuota basis data penuh. Hubungi pemilik halaman. ("+(m||c)+")";
+  return "Gagal menyimpan: "+(m||c||String(e));
+}
+async function saveProfile(){
+  if(savingProf) return;
+  const nEl=$("#pfName"); const name=nEl?nEl.value.trim():""; if(!name){ pfError("Nama wajib diisi"); if(nEl) nEl.focus(); return; }
+  pfError("");
+  const prev=S.resp[S.uid]||{};
+  const rec=Object.assign({},prev,{name,org:$("#pfOrg").value,role:$("#pfRole").value.trim(),createdAt:prev.createdAt||Date.now()});
+  savingProf=true; const btn=$("#pfBtn"); if(btn){ btn.disabled=true; btn.textContent="Menyimpan…"; }
+  try{
+    await Promise.race([STORE.put("respondents",S.uid,rec), new Promise((_,rj)=>setTimeout(()=>rj({code:"unavailable",message:"waktu habis"}),15000))]);
+    S.resp=Object.assign({},S.resp,{[S.uid]:rec}); S.editProf=false; bump(); toast("Profil tersimpan"); render(true);
+  }catch(e){ pfError(errText(e,"profil")); const b=$("#pfBtn"); if(b){ b.disabled=false; b.textContent="Coba simpan lagi"; } }
+  finally{ savingProf=false; }
+}
+
+/* ===== INSTRUMEN AHP ===== */
+const LVL={2:"sedikit lebih (antara)",3:"sedikit lebih",4:"cukup lebih (antara)",5:"lebih",6:"lebih kuat (antara)",7:"sangat lebih",8:"sangat lebih (antara)",9:"mutlak lebih"};
+const nameOf=id=>VAR[id]?VAR[id].s:(CR[id]?CR[id].en+" · "+CR[id].short:id);
+function interp(p,k){
+  if(typeof k!=="number") return `<span class="sub">Pilih satu lingkaran sesuai penilaian Anda.</span>`;
+  if(k===0) return `<b>${esc(nameOf(p.a))}</b> dan <b>${esc(nameOf(p.b))}</b> sama berpengaruh <span class="num">(1)</span>`;
+  const win=k>0?p.a:p.b, lose=k>0?p.b:p.a, v=Math.abs(k)+1;
+  return `<b>${esc(nameOf(win))}</b> ${LVL[v]} berpengaruh dibanding <b>${esc(nameOf(lose))}</b> <span class="num">(${v})</span>`;
+}
+function detailHTML(id){ const v=VAR[id]; if(v) return `<details class="more"><summary>Definisi dan data awal</summary><p><b>Definisi:</b> ${esc(v.def)}</p><p><b>Ukuran:</b> ${esc(v.ind)}</p><p><b>Data awal:</b> ${esc(v.base)}</p></details>`;
+  const c=CR[id]; return `<details class="more"><summary>Apa yang dicakup</summary><p>${esc(c.desc)} Variabel: ${c.vars.map(x=>esc(x.s)).join(", ")}.</p></details>`; }
+function dotsHTML(p,k){
+  let h=`<div class="scale" role="radiogroup" aria-label="Perbandingan ${esc(nameOf(p.a))} dan ${esc(nameOf(p.b))}">`;
+  for(let i=0;i<17;i++){ const kk=8-i; const side=kk>0?"l":kk<0?"r":"m"; const val=Math.abs(kk)+1;
+    h+=`<button type="button" class="dotb ${side}" role="radio" aria-checked="${k===kk}" data-key="${esc(p.key)}" data-k="${kk}" aria-label="${kk===0?"Sama berpengaruh":(kk>0?nameOf(p.a):nameOf(p.b))+" lebih berpengaruh, nilai "+val}"><i style="--n:${Math.abs(kk)}"></i><em>${val}</em></button>`; }
+  return h+`</div>`;
+}
+function pairHTML(p,i){ const k=S.mine.j[p.key];
+  return `<div class="pair" id="pr-${i}"><div class="pair-h"><div class="a">${esc(nameOf(p.a))}${detailHTML(p.a)}</div><div class="vs">LEBIH BERPENGARUH?</div><div class="b">${esc(nameOf(p.b))}${detailHTML(p.b)}</div></div>
+    ${dotsHTML(p,k)}<div class="interp" id="in-${i}">${interp(p,k)}</div></div>`; }
+function mineMat(m){ return buildMatrix(m,S.mine.j); }
+function stepsHTML(){
+  return MATS.map(m=>{ const b=mineMat(m); const c=m.crit?CR[m.crit]:null; const pr=b.complete?priority(b.A):null;
+    return `<button class="step ${b.complete?"done":""}" data-step="${m.id}" ${S.step===m.id?'aria-current="step"':""}><b>${c?`<i class="cdot ${c.color}"></i>${esc(c.en)}`:"Kriteria utama"}</b><small>${b.answered}/${b.total} terisi${pr?` · CR ${nf(pr.cr,2)}`:""}</small></button>`; }).join("");
+}
+function liveHTML(){
+  const m=MAT[S.step]; const b=mineMat(m); const total=ALL_KEYS.filter(k=>typeof S.mine.j[k]==="number").length;
+  let h=`<div class="ph"><h3>Hasil sementara Anda</h3><small class="num">${total}/${TOTAL_PAIRS}</small></div><div class="meter" style="margin:-6px 0 12px"><i style="width:${total/TOTAL_PAIRS*100}%"></i></div>`;
+  if(!b.complete){ h+=`<p class="sub">Isi ${b.total-b.answered} pasangan lagi pada bagian ini. Bobot dan uji konsistensi dihitung otomatis begitu semua pasangan terisi.</p>`; }
+  else { const pr=priority(b.A); const c=m.crit?CR[m.crit]:null;
+    const items=m.items.map((id,i)=>({id,w:pr.w[i]})).sort((x,y)=>y.w-x.w); const mx=items[0].w;
+    h+=items.map(x=>hbar({name:nameOf(x.id),cc:c?c.color:CR[x.id].color,frac:x.w/mx,val:pc(x.w)})).join("");
+    h+=`<div style="margin-top:10px;display:flex;gap:8px;align-items:center;flex-wrap:wrap">${chipCR(pr.cr)}<span class="sub num">λmaks ${nf(pr.lmax,3)} · CI ${nf(pr.ci,3)}</span></div>`;
+    if(pr.cr>CR_LIMIT){ const w=worstPair(m,b.A,pr.w); h+=`<p class="sub" style="margin-top:8px;color:var(--crit-t)">Jawaban belum konsisten. Tinjau pasangan <b>${esc(nameOf(w.pair.a))}</b> dan <b>${esc(nameOf(w.pair.b))}</b>: nilai Anda ${nf(w.given,2)}, nilai yang selaras dengan jawaban lain sekitar ${nf(w.implied,2)}.</p>`; }
+    else h+=`<p class="sub" style="margin-top:8px">Jawaban konsisten. Lanjut ke bagian berikutnya.</p>`; }
+  if(total===TOTAL_PAIRS){ h+=`<div style="margin-top:14px;padding-top:12px;border-top:1px solid var(--line)"><b style="font-size:13.5px">Instrumen lengkap.</b><p class="sub" style="margin:4px 0 10px">Jawaban Anda sudah ikut dihitung dalam hasil kelompok.</p>${goBtn("konfirmasi","Lanjut: konfirmasi indikator","primary sm")}</div>`; }
+  return h;
+}
+V.instrumen={
+  title:"Isi instrumen",
+  render(){
+    const head=`<div class="pagehead"><div><h1>Instrumen AHP</h1><p>${esc(GOAL.question)} Untuk setiap pasangan, pilih lingkaran yang sesuai: makin ke ujung, makin kuat pengaruhnya.</p></div><div>${svHTML()}</div></div>`;
+    const bn=accessBanner();
+    if(S.demo) return head+bn+emptyBox("Instrumen tidak tersedia pada mode contoh","Matikan mode contoh untuk mengisi data sungguhan.","");
+    if(!S.uid) return head+bn;
+    if(S.canWrite===false && !S.resp[S.uid]) return head+bn;
+    if(!S.resp[S.uid] || S.editProf){ V.instrumen._reg=!!S.resp[S.uid]; return head+bn+profileForm(); }
+    const m=MAT[S.step], idx=MATS.indexOf(m);
+    const c=m.crit?CR[m.crit]:null; V.instrumen._reg=true;
+    return head+bn+`<div class="steps" id="steps">${stepsHTML()}</div>
+      <div class="work"><section class="panel"><div class="ph"><h2>${c?`<span style="display:inline-flex;gap:8px;align-items:center"><i class="cdot ${c.color}"></i>${esc(c.en)} · ${esc(c.name)}</span>`:"Perbandingan kriteria utama (kategori 6M)"}</h2><small>${m.pairs.length} pasangan</small></div>
+        <p class="sub" style="margin:-6px 0 6px">${c?esc(c.desc)+" Bandingkan variabel di dalam kategori ini.":"Bandingkan kategori penyebab satu sama lain. Hasilnya menjadi bobot kriteria."}</p>
+        <div id="pairs">${m.pairs.map(pairHTML).join("")}</div>
+        <div class="nav-row"><button class="btn" data-nav="-1" ${idx===0?"disabled":""}>← Sebelumnya</button><button class="btn primary" data-nav="1" ${idx===MATS.length-1?"disabled":""}>Berikutnya →</button></div></section>
+        <aside class="panel live-card sticky" id="live">${liveHTML()}</aside></div>
+      <div><button class="btn sm" data-act="editProf">Ubah profil</button></div>`;
+  },
+  live(){ const reg=!!S.resp[S.uid]; if(reg!==V.instrumen._reg) render(); },
+  refresh(){ const s=$("#steps"); if(s) s.innerHTML=stepsHTML(); const l=$("#live"); if(l) l.innerHTML=liveHTML(); }
+};
+function answer(key,k){
+  if(!canEditData()||!S.resp[S.uid]) return;
+  S.mine.j[key]=k; bump(); queueSave("ahp");
+  const m=MAT[S.step]; const i=m.pairs.findIndex(p=>p.key===key);
+  $$(`.dotb[data-key="${CSS.escape(key)}"]`).forEach(b=>b.setAttribute("aria-checked",String(+b.dataset.k===k)));
+  const el=$("#in-"+i); if(el) el.innerHTML=interp(m.pairs[i],k);
+  V.instrumen.refresh(); updateNav();
+}
+
+/* ===== KONFIRMASI INDIKATOR ===== */
+function tallyHTML(id){
+  const C=calc(), o=C.K.items[id]; const n=o.n;
+  const seg=(k,c)=>n?`<i class="${c}" style="width:${o[k]/n*100}%" ${tipA({S:"Setuju",C:"Setuju dengan catatan",T:"Tidak setuju"}[c],o[k]+" dari "+n+" penilai")}></i>`:"";
+  const notes=o.notes.length?`<ul class="notes-l">${o.notes.slice(0,4).map(x=>`<li><b>${esc((C.d.resp[x.uid]||{}).org||"Responden")}</b> (${{S:"setuju",C:"dengan catatan",T:"tidak setuju"}[x.vote]}): ${esc(x.text)}</li>`).join("")}${o.notes.length>4?`<li class="sub">+${o.notes.length-4} catatan lain</li>`:""}</ul>`:"";
+  return `<div class="tally"><div style="display:flex;justify-content:space-between;align-items:center;gap:8px">${chipS(o.status)}<span class="num sub">${n?pc(o.konsensus,0)+" sepakat · "+n+" penilai":"belum ada penilai"}</span></div>
+    <div class="stack">${seg("S","S")}${seg("C","C")}${seg("T","T")}</div>
+    <div class="legend"><span><i style="background:var(--good)"></i>${o.S}</span><span><i style="background:var(--warn)"></i>${o.C}</span><span><i style="background:var(--crit)"></i>${o.T}</span></div>${notes}</div>`;
+}
+function voteBtns(id){ const x=S.mine.votes[id]; const L=[["S","Setuju"],["C","Setuju dengan catatan"],["T","Tidak setuju"]];
+  return `<div class="votes" role="group" aria-label="Konfirmasi ${esc(VAR[id].name)}">${L.map(([k,t])=>`<button type="button" class="vb ${k}" data-vote="${id}" data-v="${k}" aria-pressed="${x===k}">${t}</button>`).join("")}</div>`; }
+function confSummary(){
+  const C=calc(); const nv=Object.keys(S.mine.votes).length; const all=nv===VARS.length;
+  return `<div style="display:flex;gap:16px;align-items:center;flex-wrap:wrap;justify-content:space-between"><div><b class="num" style="font-size:20px">${nv}/${VARS.length}</b> <span class="sub">indikator sudah Anda konfirmasi</span><div class="meter" style="width:220px"><i style="width:${nv/VARS.length*100}%"></i></div></div>
+    <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">${S.mine.submitted?`<span class="chip ok">✓ Konfirmasi final terkirim</span><button class="btn sm" data-act="unsubmit">Buka kembali</button>`:`<button class="btn primary" data-act="submit" ${all?"":"disabled"}>Kirim konfirmasi final</button>${all?"":'<span class="sub">Konfirmasi semua indikator untuk mengirim.</span>'}`}</div></div>
+    <p class="sub" style="margin:10px 0 0">${C.K.voters} responden telah memberi suara · ${C.K.submitted} mengirim konfirmasi final${C.target?" dari target "+C.target:""} · ambang terkonfirmasi ${pc(C.thr,0)}</p>`;
+}
+V.konfirmasi={
+  title:"Konfirmasi indikator",
+  render(){
+    const head=`<div class="pagehead"><div><h1>Konfirmasi indikator Fishbone</h1><p>Tinjau setiap indikator penyebab. Suara seluruh stakeholder dihitung otomatis dan menentukan indikator yang masuk ke diagram Fishbone.</p></div><div>${svHTML()}</div></div>`;
+    const bn=accessBanner(); const can=canEditData()&&S.resp[S.uid];
+    const intro=(!S.demo&&S.uid&&!S.resp[S.uid])?`<div class="banner info"><span>Lengkapi profil Anda dulu di tab Isi instrumen agar suara Anda tercatat.</span>${goBtn("instrumen","Lengkapi profil","primary sm")}</div>`:"";
+    const groups=CRIT.map(c=>`<div class="cgroup"><div class="cg-h"><i class="cdot ${c.color}"></i><h3>${esc(c.en)} · ${esc(c.name)}</h3><small>${esc(c.desc)}</small></div>
+      ${c.vars.map(v=>`<div class="ci" id="ci-${v.id}"><div><h4>${esc(v.name)} <span class="chip belum" style="font-weight:600">${esc(v.hyp)}</span></h4><p class="def">${esc(v.def)}</p><div class="ind"><b>Ukuran:</b> ${esc(v.ind)}</div><div class="base"><b>Data awal:</b> ${esc(v.base)}</div>
+        ${can?`${voteBtns(v.id)}<div class="noteb ${S.mine.votes[v.id]==="C"||S.mine.votes[v.id]==="T"?"":"hide"}" id="nb-${v.id}"><textarea id="nt-${v.id}" data-note="${v.id}" maxlength="300" placeholder="Tulis catatan atau alasan singkat (mis. data pendukung yang perlu ditambahkan)">${esc(S.mine.notes[v.id]||"")}</textarea></div>`:""}</div>
+        <div id="ty-${v.id}">${tallyHTML(v.id)}</div></div>`).join("")}</div>`).join("");
+    const props=Object.keys(calc().d.conf).flatMap(u=>(calc().d.conf[u].proposals||[]).map(t=>({u,t})));
+    const propBox=`<section class="panel"><div class="ph"><h2>Usulan indikator tambahan</h2><small>Indikator yang belum ada pada daftar di atas</small></div>
+      ${can?`<div style="display:flex;gap:8px;flex-wrap:wrap"><input class="inp" id="propIn" maxlength="140" placeholder="mis. Rasio ketergantungan penduduk menurut kecamatan" style="flex:1;min-width:220px"><button class="btn" data-act="addProp">Tambah usulan</button></div>`:""}
+      <div id="propList" style="margin-top:10px">${propsHTML(props)}</div></section>`;
+    return head+bn+intro+(can?`<section class="panel" id="confSum">${confSummary()}</section>`:`<section class="panel" id="confSum"><p class="sub" style="margin:0">${C0n()}</p></section>`)+`<section class="panel">${groups}</section>`+propBox;
+  },
+  live(){ VARS.forEach(v=>{ const e=$("#ty-"+v.id); if(e) e.innerHTML=tallyHTML(v.id); }); const s=$("#confSum"); if(s&&canEditData()&&S.resp[S.uid]) s.innerHTML=confSummary();
+    const pl=$("#propList"); if(pl){ const C=calc(); pl.innerHTML=propsHTML(Object.keys(C.d.conf).flatMap(u=>(C.d.conf[u].proposals||[]).map(t=>({u,t})))); } }
+};
+function C0n(){ const C=calc(); return `${C.K.voters} responden telah memberi suara · ${C.K.submitted} mengirim konfirmasi final.`; }
+function propsHTML(props){ const C=calc(); return props.length?`<ul class="notes-l" style="font-size:13.5px">${props.map(p=>`<li>${esc(p.t)} <span class="sub">· ${esc((C.d.resp[p.u]||{}).org||"Responden")}</span></li>`).join("")}</ul>`:`<span class="sub">Belum ada usulan.</span>`; }
+function setVote(id,v){
+  if(!canEditData()||!S.resp[S.uid]) return;
+  S.mine.votes[id]=v; S.mine.submitted=false; bump(); queueSave("conf");
+  $$(`[data-vote="${id}"]`).forEach(b=>b.setAttribute("aria-pressed",String(b.dataset.v===v)));
+  const nb=$("#nb-"+id); if(nb) nb.classList.toggle("hide",!(v==="C"||v==="T"));
+  V.konfirmasi.live(); updateNav();
+}
+
+/* ===== FISHBONE ===== */
+const MET={kontribusi:["Kontribusi (bobot × sepakat)",o=>o.R],bobot:["Bobot AHP global",o=>o.gw],konsensus:["Tingkat kesepakatan",o=>o.konsensus]};
+function wrapTxt(t,n){ return t.length<=n?[t]:[t.slice(0,n-1)+"…"]; }
+function fishParts(){
+  const C=calc(), K=C.K, A=C.A; const noVotes=K.cnt.belum===VARS.length;
+  let metric=S.fb.metric; let note=""; if(metric==="kontribusi"&&noVotes){ metric="bobot"; note="Belum ada konfirmasi. Ketebalan sementara memakai bobot AHP."; }
+  const f=MET[metric][1]; const show=v=>S.fb.all||K.items[v.id].status==="ok";
+  const maxV=Math.max(1e-9,...VARS.map(v=>f(K.items[v.id]))); const catV={}; CRIT.forEach(c=>{ catV[c.id]=c.vars.reduce((s,v)=>s+(show(v)?f(K.items[v.id]):0),0); }); const maxC=Math.max(1e-9,...Object.values(catV));
+  const AX=[330,620,910], YT=[130,195,260], YB=[385,450,515]; let g="";
+  g+=`<line x1="30" y1="320" x2="982" y2="320" stroke="var(--ink)" stroke-width="5" stroke-linecap="round"/><polygon points="982,308 1002,320 982,332" fill="var(--ink)"/>`;
+  CRIT.forEach((c,ci)=>{ const top=ci<3, ax=AX[ci%3], sx=ax-120, sy=top?78:562, ys=top?YT:YB; const k=K.cat[c.id];
+    g+=`<line class="bone" x1="${sx}" y1="${sy}" x2="${ax}" y2="320" stroke="var(--c${ci+1})" stroke-width="${3+10*catV[c.id]/maxC}"/>`;
+    g+=`<g><rect x="${sx-102}" y="${top?28:564}" width="204" height="48" rx="10" fill="var(--surface)" stroke="var(--c${ci+1})" stroke-width="2.5"/><text x="${sx}" y="${top?49:585}" text-anchor="middle" font-size="13.5" font-weight="800">${esc(c.en)} · ${esc(c.short)}</text><text x="${sx}" y="${top?66:602}" text-anchor="middle" class="lbl-s">${k.nOk}/${k.n} ok · ${pc(k.share,0)} kontribusi</text></g>`;
+    c.vars.forEach((v,j)=>{ if(!show(v)) return; const y=ys[j], xb=ax-120*Math.abs(320-y)/242; const o=K.items[v.id]; const w=2+11*f(o)/maxV;
+      const dim=o.status==="ok"?1:(o.status==="belum"?.38:.55); const dash=o.status==="ok"?"":'stroke-dasharray="5 4"';
+      const mk={ok:"var(--good)",bahas:"var(--warn)",tolak:"var(--crit)",belum:"var(--muted)"}[o.status];
+      const sel=S.fb.sel===v.id;
+      g+=`<g class="rib ${sel?"sel":""}" data-rib="${v.id}" tabindex="0" role="button" aria-label="${esc(v.name)}: ${STAT[o.status][1]}, bobot ${pc(o.gw)}" ${tipA(v.name,"Bobot AHP "+pc(o.gw,1)+" · sepakat "+(o.n?pc(o.konsensus,0)+" ("+o.n+" penilai)":"belum dinilai")+" · "+STAT[o.status][1]+(o.status==="ok"?" · kontribusi "+pc(o.share,1):""))}>
+        <rect class="hit" x="${xb-244}" y="${y-24}" width="${244+4}" height="48" rx="8" ${sel?'style="fill:var(--accent-soft)"':""}/>
+        <line class="rl" x1="${xb-30}" y1="${y}" x2="${xb}" y2="${y}" stroke="var(--c${ci+1})" stroke-width="${w}" stroke-linecap="round" ${dash} stroke-opacity="${dim}"/>
+        <circle cx="${xb-30}" cy="${y}" r="5.5" fill="${o.status==="belum"?"var(--surface)":mk}" stroke="${mk}" stroke-width="2"/>
+        <text class="n" x="${xb-42}" y="${y-3}" text-anchor="end" font-size="12.5" font-weight="700" opacity="${o.status==="ok"?1:.7}">${esc(v.s)}</text>
+        <text class="lbl-s" x="${xb-42}" y="${y+13}" text-anchor="end">bobot ${pc(o.gw)} · sepakat ${o.n?pc(o.konsensus,0):"–"}</text></g>`; });
+  });
+  g+=`<g class="head"><rect x="1004" y="258" width="226" height="124" rx="12"/><text x="1117" y="294" text-anchor="middle" font-size="14" font-weight="700">Masalah utama</text><text x="1117" y="322" text-anchor="middle" font-size="17" font-weight="800">Indeks Gini naik</text><text x="1117" y="346" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="14">0,335 → 0,359</text><text x="1117" y="368" text-anchor="middle" font-size="11.5" opacity=".8">Kab. Trenggalek, 2021–2025</text></g>`;
+  const svg=`<svg class="fish" viewBox="0 0 1240 640" role="group" aria-label="Diagram Fishbone penyebab kenaikan Indeks Gini">${g}</svg>`;
+  // panel sisi
+  const sv=S.fb.sel&&VAR[S.fb.sel]; let side;
+  if(sv){ const o=K.items[sv.id], c=CR[sv.crit]; const ord=K.ranked.findIndex(x=>x.id===sv.id);
+    side=`<div class="ph"><h3 style="font-size:15px;display:flex;gap:8px;align-items:center"><i class="cdot ${c.color}"></i>${esc(sv.name)}</h3>${chipS(o.status)}</div><p class="sub" style="margin:-6px 0 10px">${esc(c.en)} · ${esc(sv.id)} · ${esc(sv.hyp)}</p>
+      <dl><dt>Bobot lokal</dt><dd class="num">${pc(A.groups["S:"+sv.crit].w[sv.id])}</dd><dt>Bobot global (G)</dt><dd class="num">${pc(o.gw,2)}</dd><dt>Sepakat (K)</dt><dd class="num">${o.n?pc(o.konsensus,0)+" · "+o.n+" penilai":"belum dinilai"}</dd><dt>Skor G × K</dt><dd class="num">${nf(o.R*100,2)}</dd><dt>Kontribusi Fishbone</dt><dd class="num">${o.status==="ok"?pc(o.share,1):"–"}</dd><dt>Peringkat</dt><dd class="num">${ord>=0?"#"+(ord+1)+" dari "+K.ranked.length:"–"}</dd></dl>
+      <p class="sub" style="margin:12px 0 4px"><b>Data awal:</b> ${esc(sv.base)}</p>${o.notes.length?`<ul class="notes-l">${o.notes.slice(0,3).map(x=>`<li>${esc(x.text)}</li>`).join("")}</ul>`:""}`; }
+  else side=`<div class="empty" style="padding:18px 6px"><b>Pilih rusuk Fishbone</b>Klik atau tekan Enter pada salah satu indikator untuk melihat rincian perhitungan.</div>`;
+  // pareto
+  const par=K.ranked.length?K.ranked.map((o,i)=>{ const v=VAR[o.id], c=CR[v.crit]; return `<div class="hb f-${c.color}" ${tipA(v.name,"G "+pc(o.gw,2)+" × K "+pc(o.konsensus,0)+" = skor "+nf(o.R*100,2))}><div class="nm"><span class="rank">${i+1}</span><i class="cdot ${c.color}"></i><span>${esc(v.s)}</span></div><div class="track"><div class="fill" style="width:${o.share/K.ranked[0].share*100}%"></div></div><div class="val num">${pc(o.share)}</div><div class="val num sub">${pc(o.cum,0)}</div></div>`; }).join("")
+    :emptyBox("Belum ada indikator yang mencapai ambang","Turunkan ambang atau tunggu konfirmasi stakeholder. Peringkat akan tersusun otomatis.");
+  // tabel hitung
+  const all=VARS.slice().sort((a,b)=>K.items[b.id].R-K.items[a.id].R);
+  const tab=`<div class="scrollx"><table class="t"><thead><tr><th>Variabel</th><th class="r">G (bobot AHP)</th><th class="r">K (sepakat)</th><th class="r">R = G × K</th><th>Status</th><th class="r">Kontribusi</th></tr></thead><tbody>${all.map(v=>{ const o=K.items[v.id]; return `<tr data-rib="${v.id}" style="cursor:pointer"><td><i class="cdot ${CR[v.crit].color}"></i> ${esc(v.s)}</td><td class="r num">${pc(o.gw,2)}</td><td class="r num">${o.n?pc(o.konsensus,0):"–"}</td><td class="r num">${nf(o.R*100,2)}</td><td>${chipS(o.status)}</td><td class="r num">${o.status==="ok"?pc(o.share,1):"–"}</td></tr>`; }).join("")}</tbody></table></div>`;
+  const final = C.target ? K.submitted>=C.target : false;
+  const kp=`<div class="kpis"><div class="kpi"><div class="l">Status perhitungan</div><div class="v" style="font-size:20px">${final?"Final":"Sementara"}</div><div class="s">${K.submitted} final · ${K.voters} memberi suara${C.target?" · target "+C.target:""}</div></div>
+    <div class="kpi"><div class="l">Terkonfirmasi (K ≥ ${pc(C.thr,0)})</div><div class="v num">${K.cnt.ok}<small>dari ${VARS.length}</small></div><div class="s">${K.cnt.bahas} dibahas · ${K.cnt.tolak} ditolak</div></div>
+    <div class="kpi"><div class="l">Kategori dominan</div><div class="v" style="font-size:20px">${(()=>{ const t=CRIT.slice().sort((a,b)=>K.cat[b.id].share-K.cat[a.id].share)[0]; return K.sumR>0?esc(t.en):"–"; })()}</div><div class="s">${K.sumR>0?pc(CRIT.map(c=>K.cat[c.id].share).sort((a,b)=>b-a)[0],0)+" dari total kontribusi":"menunggu konfirmasi"}</div></div>
+    <div class="kpi"><div class="l">Tiga teratas</div><div class="v" style="font-size:15px;line-height:1.35">${K.ranked.slice(0,3).map(o=>esc(VAR[o.id].s)).join("<br>")||"–"}</div></div></div>`;
+  return {svg,side,par,tab,kp,note,metric};
+}
+V.fishbone={
+  title:"Fishbone",
+  render(){
+    const C=calc(), P=fishParts();
+    return `<div class="pagehead"><div><h1>Analisis Fishbone otomatis</h1><p>Rusuk diagram dihitung dari bobot AHP dan kesepakatan seluruh stakeholder. Setiap suara baru langsung mengubah ketebalan, status, dan peringkat.</p></div></div>
+      <div id="fKp">${P.kp}</div>
+      <section class="panel"><div class="ph"><h2>Diagram Fishbone penyebab kenaikan Gini</h2><small id="fNote">${esc(P.note)}</small></div>
+        <div class="ctrl" style="margin-bottom:12px"><div class="seg" role="group" aria-label="Ukuran rusuk">${Object.keys(MET).map(k=>`<button type="button" data-met="${k}" aria-pressed="${S.fb.metric===k}">${MET[k][0]}</button>`).join("")}</div>
+          <label class="switch"><input type="checkbox" id="fAll" ${S.fb.all?"checked":""}> Tampilkan indikator belum terkonfirmasi</label>
+          <label style="min-width:240px;flex:1;max-width:340px">Ambang <input type="range" id="thr" min="50" max="95" step="5" value="${Math.round(C.thr*100)}"><b class="num" id="thrV">${pc(C.thr,0)}</b></label>
+          ${S.isAdmin&&!S.demo?`<button class="btn sm" data-act="saveThr">Jadikan ambang resmi</button>`:""}</div>
+        <p class="sub fish-hint" style="margin:0 0 8px">Geser diagram ke samping untuk melihat seluruhnya.</p><div class="fish-wrap" id="fSvg">${P.svg}</div>
+        <div class="legend" style="margin-top:12px"><span><i style="background:var(--good);border-radius:50%"></i>Terkonfirmasi</span><span><i style="background:var(--warn);border-radius:50%"></i>Perlu dibahas</span><span><i style="background:var(--crit);border-radius:50%"></i>Ditolak</span><span><i style="border:2px solid var(--muted);border-radius:50%"></i>Belum dinilai</span><span>Garis putus-putus = belum lolos ambang · tebal rusuk = <b id="fMet">${esc(MET[P.metric][0])}</b></span></div></section>
+      <div class="grid g-main"><section class="panel"><div class="ph"><h2>Peringkat akar masalah terkonfirmasi</h2><small>kontribusi · kumulatif</small></div><div class="pareto" id="fPar">${P.par}</div></section>
+        <section class="panel sidepanel" id="fSide">${P.side}</section></div>
+      <section class="panel"><div class="ph"><h2>Rincian perhitungan otomatis</h2><small>klik baris untuk menyorot di diagram</small></div>
+        <div class="formula">K = (Setuju + 0,5 × Setuju dengan catatan) ÷ jumlah penilai (tertimbang bobot responden)
+Terkonfirmasi bila K ≥ ambang
+R = G × K     dengan G = bobot global AHP
+Kontribusi = R ÷ Σ R seluruh indikator terkonfirmasi</div><div id="fTab" style="margin-top:12px">${P.tab}</div></section>`;
+  },
+  live(){ V.fishbone.refresh(); },
+  refresh(){ const P=fishParts(), C=calc(); const set=(id,h)=>{ const e=$(id); if(e) e.innerHTML=h; };
+    set("#fKp",P.kp); set("#fSvg",P.svg); set("#fSide",P.side); set("#fPar",P.par); set("#fTab",P.tab); set("#fNote",esc(P.note)); set("#fMet",esc(MET[P.metric][0])); const tv=$("#thrV"); if(tv) tv.textContent=pc(C.thr,0);
+    $$("[data-met]").forEach(b=>b.setAttribute("aria-pressed",String(b.dataset.met===S.fb.metric))); },
+  mount(){
+    $("#fAll").onchange=e=>{ S.fb.all=e.target.checked; V.fishbone.refresh(); };
+    $("#thr").oninput=e=>{ S.thr=+e.target.value/100; bump(); V.fishbone.refresh(); updateNav(); };
+  }
+};
+
+/* ===== STRUKTUR AHP ===== */
+V.struktur={
+  title:"Struktur AHP",
+  render(){
+    const tree=CRIT.map(c=>`<div class="tree-c"><h3><i class="cdot ${c.color}"></i>${esc(c.en)} · ${esc(c.name)}</h3><p>${esc(c.desc)}</p><ul>${c.vars.map(v=>`<li><span class="id">${v.id}</span><span><b>${esc(v.name)}</b></span></li>`).join("")}</ul></div>`).join("");
+    const rows=VARS.map(v=>`<tr><td class="num">${v.id}</td><td><b>${esc(v.name)}</b></td><td>${esc(v.def)}</td><td>${esc(v.ind)}</td><td>${esc(v.base)}</td><td>${esc(v.src)}</td><td class="num">${v.hyp}</td></tr>`).join("");
+    const sc=SAATY.map(r=>`<tr><td class="num"><b>${r[0]}</b></td><td>${esc(r[1])}</td><td>${esc(r[2])}</td></tr>`).join("");
+    return `<div class="pagehead"><div><h1>Struktur dan variabel AHP</h1><p>Tiga tingkat: tujuan, 6 kriteria sesuai kategori 6M Fishbone, dan 18 variabel indikator yang diturunkan dari enam hipotesis kajian (H1 sampai H6).</p></div></div>
+      <section class="panel"><div class="ph"><h2>Hierarki keputusan</h2><small>33 perbandingan berpasangan: 15 kriteria + 18 variabel (3 per kriteria)</small></div>
+        <div class="tree-c" style="background:var(--accent-soft);margin-bottom:12px"><h3>Tujuan</h3><p style="margin:2px 0 0;color:var(--ink)"><b>${esc(GOAL.title)}</b>. ${esc(GOAL.question)}</p></div><div class="grid g3">${tree}</div></section>
+      <section class="panel"><div class="ph"><h2>Definisi operasional variabel</h2><small>data awal berasal dari Laporan Pendahuluan</small></div><div class="scrollx"><table class="t" style="min-width:980px"><thead><tr><th>ID</th><th>Variabel</th><th>Definisi</th><th>Ukuran</th><th>Data awal</th><th>Sumber</th><th>Hipotesis</th></tr></thead><tbody>${rows}</tbody></table></div></section>
+      <div class="grid g2"><section class="panel"><div class="ph"><h2>Skala perbandingan Saaty</h2></div><div class="scrollx"><table class="t"><thead><tr><th>Nilai</th><th>Arti</th><th>Penjelasan</th></tr></thead><tbody>${sc}</tbody></table></div></section>
+      <section class="panel"><div class="ph"><h2>Cara perhitungan</h2></div><div class="formula">1. Matriks A: a_ij = nilai perbandingan, a_ji = 1 / a_ij
+2. Bobot w = vektor eigen utama A (iterasi pangkat)
+3. λmaks = rata-rata (A·w)_i / w_i
+4. CI = (λmaks − n) / (n − 1)
+5. CR = CI / RI(n), RI: n=3 → 0,58 · n=6 → 1,24
+6. Konsisten bila CR ≤ 0,10
+7. Gabungan responden: rata-rata geometrik tertimbang
+   per pasangan, lalu langkah 2 sampai 6
+8. Bobot global = bobot kriteria × bobot lokal
+9. Fishbone: R = G × K (lihat tab Fishbone)</div></section></div>`;
+  }
+};
+
+/* ===== PESERTA & PENGATURAN ===== */
+V.peserta={
+  title:"Peserta",
+  render(){
+    const C=calc(), ids=Object.keys(C.d.resp); const adm=S.isAdmin&&!S.demo;
+    const rows=ids.map(u=>{ const r=C.d.resp[u], p=C.A.prog[u], c=C.d.conf[u]||{}; const nv=c.votes?Object.keys(c.votes).length:0; const w=(C.d.cfg.weights&&C.d.cfg.weights[u]!=null)?C.d.cfg.weights[u]:1;
+      return `<tr><td><b>${esc(r.name)}</b><div class="sub">${esc(r.role||"")}</div></td><td>${esc(r.org||"")}</td><td class="num">${p?p.answered:0}/${TOTAL_PAIRS}</td><td>${p&&p.maxCR!=null?chipCR(p.maxCR):"–"}</td><td class="num">${nv}/${VARS.length} ${c.submitted?'<span class="chip ok">final</span>':""}</td>
+      <td>${adm?`<input class="inp" type="number" min="0.5" max="3" step="0.5" value="${w}" data-w="${esc(u)}" style="width:76px;padding:5px 8px" aria-label="Bobot responden ${esc(r.name)}">`:`<span class="num">${w}</span>`}</td>
+      ${adm?`<td><button class="btn sm danger" data-del="${esc(u)}">Hapus</button></td>`:""}</tr>`; }).join("");
+    const cfg=`<section class="panel"><div class="ph"><h2>Pengaturan kesepakatan</h2><small>${adm?"Hanya editor yang dapat mengubah":"Ditetapkan oleh editor"}</small></div>
+      <div class="form"><label>Jumlah responden yang ditargetkan<input id="cfgTarget" type="number" min="0" max="500" value="${C.target||""}" ${adm?"":"disabled"} placeholder="mis. 12"></label>
+      <label>Ambang indikator terkonfirmasi: <b class="num" id="cfgThrV">${pc(S.cfg.threshold||0.7,0)}</b><input id="cfgThr" type="range" min="50" max="95" step="5" value="${Math.round((S.cfg.threshold||0.7)*100)}" ${adm?"":"disabled"}></label>
+      ${adm?`<div><button class="btn primary" data-act="saveCfg">Simpan pengaturan</button></div>`:""}</div>
+      <p class="sub" style="margin:10px 0 0">Bobot responden (1 = sama) dapat dinaikkan untuk pakar utama. Bobot dipakai pada rata-rata geometrik AHP dan pada penghitungan kesepakatan.</p></section>`;
+    return `<div class="pagehead"><div><h1>Peserta dan pengaturan</h1><p>Daftar stakeholder yang telah mendaftar, kemajuan pengisian, dan pengaturan perhitungan.</p></div></div>${cfg}
+      <section class="panel"><div class="ph"><h2>Responden</h2><small>${ids.length} terdaftar</small></div>${ids.length?`<div class="scrollx"><table class="t"><thead><tr><th>Nama</th><th>Instansi</th><th>AHP</th><th>CR maks</th><th>Konfirmasi</th><th>Bobot</th>${adm?"<th></th>":""}</tr></thead><tbody>${rows}</tbody></table></div>`:emptyBox("Belum ada responden","Bagikan halaman ini ke stakeholder dan minta mereka membuka tab Isi instrumen.")}
+      ${adm&&ids.length?`<div id="delBox"></div>`:""}</section>`;
+  },
+  mount(){
+    const t=$("#cfgThr"); if(t) t.oninput=e=>{ $("#cfgThrV").textContent=e.target.value+"%"; };
+  }
+};
+
+/* ===== NAVIGASI, TOOLTIP, AKSI ===== */
+const NAV=[["ringkasan","Ringkasan"],["instrumen","Isi instrumen"],["hasil","Hasil AHP"],["konfirmasi","Konfirmasi indikator"],["fishbone","Fishbone"],["struktur","Struktur AHP"],["peserta","Peserta"]];
+function updateNav(){
+  const C=calc(); const mineN=ALL_KEYS.filter(k=>typeof S.mine.j[k]==="number").length, vN=Object.keys(S.mine.votes).length;
+  const badge={instrumen:(S.demo||!S.resp[S.uid])?"":mineN+"/"+TOTAL_PAIRS, konfirmasi:(S.demo||!S.resp[S.uid])?"":vN+"/"+VARS.length, fishbone:C.K.cnt.ok+"/"+VARS.length, peserta:Object.keys(C.d.resp).length};
+  $("#tabs").innerHTML=NAV.map(([id,t])=>`<a class="tab" href="#${id}" data-go="${id}" ${S.view===id?'aria-current="page"':""}>${t}${badge[id]!==undefined&&badge[id]!==""?`<span class="badge num">${badge[id]}</span>`:""}</a>`).join("");
+  const C2=C, n=Object.keys(C2.d.resp).length; const lv=$("#live");
+  const cls=S.demo?"demo":(STORE&&STORE.kind==="db"?"":"off");
+  const txt=S.demo?"Mode contoh · data tidak disimpan":(STORE&&STORE.kind==="db"?`Tersinkron langsung · ${n} responden`:`Mode lokal (satu peramban) · ${n} responden`);
+  lv.className="live "+cls; lv.innerHTML=`<span class="dot-live"></span>${esc(txt)}`;
+}
+function render(top){
+  const v=V[S.view]||V.ringkasan; const m=$("#main");
+  m.innerHTML=v.render(); if(v.mount) v.mount(); updateNav(); if(top){ try{ window.scrollTo({top:0}); }catch(e){} }
+}
+function go(v){ if(!V[v]) v="ringkasan"; S.view=v; if(location.hash!=="#"+v) { try{ location.hash=v; }catch(e){} } render(true); }
+let rq=0; function onData(){ bump(); cancelAnimationFrame(rq); rq=requestAnimationFrame(()=>{ const v=V[S.view];
+  if(v.live){ v.live(); updateNav(); } else render(); }); }
+
+const tip=()=>$("#tip");
+document.addEventListener("pointermove",e=>{ const t=e.target.closest&&e.target.closest("[data-tip]"); const el=tip(); if(!t){ el.hidden=true; return; }
+  const [h,b]=t.getAttribute("data-tip").split("|"); el.innerHTML=`<b>${esc(h)}</b>${esc(b||"")}`; el.hidden=false;
+  const w=el.offsetWidth, hh=el.offsetHeight; let x=e.clientX+14, y=e.clientY+16; if(x+w>innerWidth-8) x=e.clientX-w-14; if(y+hh>innerHeight-8) y=e.clientY-hh-14; el.style.left=Math.max(8,x)+"px"; el.style.top=Math.max(8,y)+"px"; });
+document.addEventListener("pointerleave",()=>{ tip().hidden=true; },true);
+document.addEventListener("scroll",()=>{ tip().hidden=true; },{passive:true});
+
+document.addEventListener("click",async e=>{
+  const t=e.target; const q=s=>t.closest&&t.closest(s);
+  let el;
+  if((el=q(".dotb"))) { answer(el.dataset.key,+el.dataset.k); return; }
+  if((el=q("[data-vote]"))) { setVote(el.dataset.vote,el.dataset.v); return; }
+  if((el=q("[data-step]"))) { S.step=el.dataset.step; render(); return; }
+  if((el=q("[data-nav]"))) { const i=MATS.findIndex(m=>m.id===S.step)+(+el.dataset.nav); if(MATS[i]){ S.step=MATS[i].id; render(); } return; }
+  if((el=q("[data-go]"))) { if(el.tagName==="A") e.preventDefault(); go(el.dataset.go); return; }
+  if((el=q("[data-met]"))) { S.fb.metric=el.dataset.met; V.fishbone.refresh(); return; }
+  if((el=q("[data-rib]"))) { S.fb.sel=el.dataset.rib; V.fishbone.refresh(); return; }
+  if((el=q("[data-del]"))) { const u=el.dataset.del; const b=$("#delBox"); b.innerHTML=`<div class="banner" style="margin-top:12px"><span>Hapus <b>${esc(S.resp[u]?S.resp[u].name:u)}</b> beserta seluruh jawabannya? Tindakan ini tidak dapat dibatalkan.</span><button class="btn sm danger" data-del-ok="${esc(u)}">Ya, hapus</button><button class="btn sm" data-act="delNo">Batal</button></div>`; return; }
+  if((el=q("[data-del-ok]"))) { const u=el.dataset.delOk; try{ await STORE.del("respondents",u); await STORE.del("ahp",u); await STORE.del("confirm",u); toast("Responden dihapus"); }catch(err){ toast("Gagal menghapus"); } return; }
+  if((el=q("[data-act]"))) { const a=el.dataset.act;
+    if(a==="saveProf"){ saveProfile(); }
+    else if(a==="demoOff"){ S.demo=false; $("#demoSw").checked=false; bump(); render(); }
+    else if(a==="editProf"){ S.editProf=true; render(); }
+    else if(a==="delNo"){ $("#delBox").innerHTML=""; }
+    else if(a==="submit"){ S.mine.submitted=true; bump(); queueSave("conf"); V.konfirmasi.live(); toast("Konfirmasi final terkirim"); }
+    else if(a==="unsubmit"){ S.mine.submitted=false; bump(); queueSave("conf"); V.konfirmasi.live(); }
+    else if(a==="addProp"){ const i=$("#propIn"); const tx=i.value.trim(); if(tx&&canEditData()){ S.mine.proposals=S.mine.proposals.concat([tx]); i.value=""; bump(); queueSave("conf"); V.konfirmasi.live(); } }
+    else if(a==="saveThr"){ try{ await STORE.put("config","main",Object.assign({},S.cfg,{threshold:S.thr!=null?S.thr:(S.cfg.threshold||0.7)})); S.thr=null; toast("Ambang resmi disimpan"); }catch(err){ toast("Hanya editor yang dapat mengubah ambang"); } }
+    else if(a==="saveCfg"){ const tg=Math.max(0,parseInt($("#cfgTarget").value,10)||0); try{ await STORE.put("config","main",Object.assign({},S.cfg,{target:tg,threshold:+$("#cfgThr").value/100})); toast("Pengaturan disimpan"); }catch(err){ toast("Hanya editor yang dapat mengubah pengaturan"); } }
+  }
+});
+document.addEventListener("keydown",e=>{ if((e.key==="Enter"||e.key===" ")&&e.target.matches&&e.target.matches("[data-rib]")){ e.preventDefault(); S.fb.sel=e.target.dataset.rib; V.fishbone.refresh(); } });
+document.addEventListener("submit",e=>{ if(e.target&&e.target.id==="profForm"){ e.preventDefault(); } });
+document.addEventListener("keydown",e=>{ if(e.key==="Enter"&&e.target&&e.target.closest&&e.target.closest("#profForm")&&e.target.tagName==="INPUT"){ e.preventDefault(); saveProfile(); } });
+document.addEventListener("input",e=>{ const t=e.target;
+  if(t.dataset&&t.dataset.note){ if(!canEditData()) return; S.mine.notes[t.dataset.note]=t.value.slice(0,300); S.mine.submitted=false; queueSave("conf"); }
+});
+document.addEventListener("change",async e=>{ const t=e.target;
+  if(t.dataset&&t.dataset.w!==undefined){ const w=Math.max(0.5,Math.min(3,+t.value||1)); const weights=Object.assign({},S.cfg.weights||{},{[t.dataset.w]:w}); try{ await STORE.put("config","main",Object.assign({},S.cfg,{weights})); toast("Bobot responden disimpan"); }catch(err){ toast("Hanya editor yang dapat mengubah bobot"); } }
+});
+window.addEventListener("hashchange",()=>{ const v=location.hash.replace("#",""); if(V[v]&&v!==S.view){ S.view=v; render(true); } });
+
+/* ===== BOOT ===== */
+function showErr(msg){ let b=document.getElementById("errBar"); if(!b){ b=document.createElement("div"); b.id="errBar"; b.className="err-bar"; b.setAttribute("role","alert"); document.body.appendChild(b); }
+  b.innerHTML=`<span>${esc(msg)}</span><button type="button" class="btn sm" onclick="this.parentNode.remove()">Tutup</button>`; }
+window.addEventListener("error",e=>{ showErr("Terjadi galat pada halaman: "+(e.message||"tidak diketahui")+(e.lineno?" (baris "+e.lineno+")":"")); });
+window.addEventListener("unhandledrejection",e=>{ const r=e.reason||{}; showErr("Terjadi galat: "+(r.message||r.code||String(r))); });
+const subErr=name=>e=>{ console.warn(name,e); if(e&&(e.code==="revoked"||e.code==="not_granted")) showErr("Koneksi data bersama terputus ("+e.code+"). Muat ulang halaman."); };
+async function boot(){
+  $("#main").innerHTML=`<div class="empty" style="padding:48px 12px"><b>Memuat instrumen…</b>Menghubungkan ke data bersama.</div>`;
+  try{ STORE=await makeStore(); }catch(e){ STORE=null; }
+  if(!STORE){ showErr("Tidak dapat menyiapkan penyimpanan. Muat ulang halaman."); return; }
+  S.uid=STORE.uid; S.isAdmin=!!STORE.isAdmin; S.canWrite=STORE.canWrite; S.kind=STORE.kind;
+  const h=location.hash.replace("#",""); if(V[h]) S.view=h;
+  $("#demoSw").onchange=e=>{ S.demo=e.target.checked; bump(); render(); };
+  const hold=(name,fn)=>function(m){ const was=!!S.resp[S.uid]; fn(m); if(!S.got[name]){ S.got[name]=true; bump(); render(); return; } if(name==="respondents"&&was!==!!S.resp[S.uid]){ bump(); render(); return; } onData(); };
+  STORE.sub("respondents",hold("respondents",m=>{ S.resp=m; }),subErr("respondents"));
+  STORE.sub("ahp",hold("ahp",m=>{ S.ahp=m; if(S.uid&&m[S.uid]&&!S.dirty.ahp) S.mine.j=Object.assign({},m[S.uid].j||{}); }),subErr("ahp"));
+  STORE.sub("confirm",hold("confirm",m=>{ S.conf=m; const c=S.uid&&m[S.uid]; if(c&&!S.dirty.conf){ S.mine.votes=Object.assign({},c.votes||{}); S.mine.notes=Object.assign({},c.notes||{}); S.mine.proposals=(c.proposals||[]).slice(); S.mine.submitted=!!c.submitted; } }),subErr("confirm"));
+  STORE.subDoc("config/main",hold("config",c=>{ S.cfg=c||{}; }),subErr("config"));
+  render();
+}
+boot();
+
+</script>
+
+</body></html>

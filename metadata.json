@@ -1,0 +1,8 @@
+{
+  "name": "Dasbor AHP Hilirisasi Industri",
+  "description": "Sistem Pendukung Keputusan Interaktif Prioritas Hilirisasi Komoditas & Industri Indonesia berbasis Analytic Hierarchy Process (AHP)",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}

@@ -1,0 +1,63 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 420 120" fill="none" className="h-12 w-auto">
+  <defs>
+    <!-- Gold / Ochre Gradient -->
+    <linearGradient id="bappenasGold" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#C58F2C"/>
+      <stop offset="100%" stop-color="#9A6B1A"/>
+    </linearGradient>
+    <!-- Blue Gradient -->
+    <linearGradient id="bappenasBlue" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#2563EB"/>
+      <stop offset="100%" stop-color="#1E3A8A"/>
+    </linearGradient>
+    <!-- Cyan Gradient -->
+    <linearGradient id="bappenasCyan" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#06B6D4"/>
+      <stop offset="100%" stop-color="#0284C7"/>
+    </linearGradient>
+    <!-- Green Gradient -->
+    <linearGradient id="bappenasGreen" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#22C55E"/>
+      <stop offset="100%" stop-color="#15803D"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Left: Stylized 3D Arches Mark -->
+  <g transform="translate(10, 10)">
+    <!-- Arch 1: Top-Left (Gold arch with blue vertical fins) -->
+    <!-- Top curved roof -->
+    <path d="M 28 14 C 28 4, 48 4, 60 14 C 70 23, 62 34, 52 38 L 44 41 C 40 37, 46 28, 42 22 C 38 18, 30 18, 28 14 Z" fill="url(#bappenasGold)"/>
+    <!-- Vertical fins blue -->
+    <rect x="25" y="18" width="3.5" height="42" rx="1.5" fill="#1D4ED8"/>
+    <rect x="31" y="22" width="3.5" height="38" rx="1.5" fill="#2563EB"/>
+    <rect x="37" y="27" width="3.5" height="33" rx="1.5" fill="#3B82F6"/>
+
+    <!-- Arch 2: Bottom-Left (Cyan arch with dark blue fins) -->
+    <!-- Curved top/face -->
+    <path d="M 25 48 C 25 38, 46 38, 58 48 C 66 55, 60 66, 50 69 L 42 71 C 38 67, 44 58, 40 54 C 36 50, 27 50, 25 48 Z" fill="url(#bappenasCyan)"/>
+    <rect x="25" y="52" width="3.5" height="40" rx="1.5" fill="#1E40AF"/>
+    <rect x="31" y="55" width="3.5" height="37" rx="1.5" fill="#0284C7"/>
+    <rect x="37" y="59" width="3.5" height="33" rx="1.5" fill="#0EA5E9"/>
+    <rect x="43" y="63" width="3.5" height="29" rx="1.5" fill="#38BDF8"/>
+
+    <!-- Arch 3: Right (Green arch with emerald fins) -->
+    <path d="M 58 28 C 58 18, 78 18, 90 28 C 98 35, 92 46, 82 49 L 74 51 C 70 47, 76 38, 72 34 C 68 30, 59 30, 58 28 Z" fill="url(#bappenasGreen)"/>
+    <rect x="58" y="32" width="3.5" height="44" rx="1.5" fill="#166534"/>
+    <rect x="64" y="35" width="3.5" height="41" rx="1.5" fill="#15803D"/>
+    <rect x="70" y="39" width="3.5" height="37" rx="1.5" fill="#22C55E"/>
+    <rect x="76" y="43" width="3.5" height="33" rx="1.5" fill="#4ADE80"/>
+  </g>
+
+  <!-- Right: Official Typography -->
+  <g transform="translate(124, 0)">
+    <text x="0" y="48" font-family="'Inter', sans-serif" font-weight="900" font-size="34" letter-spacing="1.5" fill="#0F172A">
+      BAPPENAS
+    </text>
+    <text x="0" y="74" font-family="'Inter', sans-serif" font-weight="600" font-size="12.5" fill="#334155" letter-spacing="0.2">
+      Kementerian Perencanaan Pembangunan Nasional/
+    </text>
+    <text x="0" y="94" font-family="'Inter', sans-serif" font-weight="600" font-size="12.5" fill="#334155" letter-spacing="0.2">
+      Badan Perencanaan Pembangunan Nasional
+    </text>
+  </g>
+</svg>

@@ -1,0 +1,656 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Dasbor AHP Hilirisasi</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<style>
+/* Layout: sticky header with tabs; summary first (KPI strip + cross-commodity heatmaps), then per-commodity detail, form, import. */
+:root {
+  --bg: #F3F5F4; --surface: #FFFFFF; --surface-2: #EAF0EE; --ink: #17262A; --muted: #5A6A6D; --line: #D5DEDB;
+  --accent: #0E6B63; --accent-ink: #FFFFFF; --accent-soft: #D3EAE5;
+  --good: #2D7A4C; --good-soft: #DCEFE3; --warn: #A86A12; --warn-soft: #F7E7CC; --bad: #B13A3A; --bad-soft: #F6DADA;
+  --k1: #0E6B63; --k2: #C2862A; --k3: #3C679B; --k4: #8A4C7B; --k5: #6A8636;
+  --f-ui: "Public Sans", "Segoe UI", system-ui, sans-serif;
+  --f-num: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+  --r: 10px;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #0F1719; --surface: #162124; --surface-2: #1D2B2F; --ink: #E3ECEA; --muted: #98A9AB; --line: #2C3D41;
+  --accent: #4FB8AC; --accent-ink: #0B1A1C; --accent-soft: #173A37;
+  --good: #63C08A; --good-soft: #17342A; --warn: #E2A84B; --warn-soft: #3A2C14; --bad: #EE7D7D; --bad-soft: #3D1E20;
+  --k1: #4FB8AC; --k2: #E0A94D; --k3: #7FA7DB; --k4: #C68BB9; --k5: #A3C26A; color-scheme: dark } }
+:root[data-theme="dark"] {
+  --bg: #0F1719; --surface: #162124; --surface-2: #1D2B2F; --ink: #E3ECEA; --muted: #98A9AB; --line: #2C3D41;
+  --accent: #4FB8AC; --accent-ink: #0B1A1C; --accent-soft: #173A37;
+  --good: #63C08A; --good-soft: #17342A; --warn: #E2A84B; --warn-soft: #3A2C14; --bad: #EE7D7D; --bad-soft: #3D1E20;
+  --k1: #4FB8AC; --k2: #E0A94D; --k3: #7FA7DB; --k4: #C68BB9; --k5: #A3C26A; color-scheme: dark }
+* { box-sizing: border-box }
+[hidden] { display: none !important }
+body { background: var(--bg); color: var(--ink); font: 14px/1.5 var(--f-ui); margin: 0 }
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 10; background: var(--surface) }
+.wrap { max-width: 1240px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)) }
+header.top { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; background: var(--surface); border-bottom: 1px solid var(--line) }
+.toprow { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 20px; padding-block: 14px 8px }
+.brand h1 { font-size: 18px; margin: 0; letter-spacing: -0.01em; text-wrap: balance }
+.brand p { margin: 2px 0 0; color: var(--muted); font-size: 12.5px }
+.live { margin-left: auto; display: flex; align-items: center; gap: 8px; font-size: 12.5px; color: var(--muted) }
+.dot { width: 9px; height: 9px; border-radius: 50%; background: var(--muted) }
+.dot.on { background: var(--good); box-shadow: 0 0 0 4px var(--good-soft) }
+.dot.sample { background: var(--warn); box-shadow: 0 0 0 4px var(--warn-soft) }
+nav.tabs { display: flex; gap: 4px; overflow-x: auto; padding-bottom: 0 }
+nav.tabs button { font: 600 13px var(--f-ui); color: var(--muted); background: none; border: 0; padding: 10px 12px; border-bottom: 2px solid transparent; cursor: pointer; white-space: nowrap }
+nav.tabs button[aria-selected="true"] { color: var(--accent); border-color: var(--accent) }
+nav.tabs button:focus-visible, button:focus-visible, select:focus-visible, input:focus-visible, textarea:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px }
+main { padding-block: 20px 48px; display: grid; gap: 20px }
+.banner { border-radius: var(--r); padding: 10px 14px; font-size: 13px; display: flex; gap: 12px; align-items: center; flex-wrap: wrap }
+.banner.warn { background: var(--warn-soft); color: var(--ink); border: 1px solid color-mix(in srgb, var(--warn) 40%, transparent) }
+.banner.info { background: var(--accent-soft); border: 1px solid color-mix(in srgb, var(--accent) 30%, transparent) }
+.panel { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 16px; min-width: 0 }
+.panel h2 { font-size: 15px; margin: 0 0 4px; text-wrap: balance }
+.panel .sub { color: var(--muted); font-size: 12.5px; margin: 0 0 12px }
+.grid { display: grid; gap: 16px }
+.g2 { grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)) }
+.g3 { grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)) }
+.kpis { display: grid; gap: 12px; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)) }
+.kpi { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 12px 14px }
+.kpi .lab { font-size: 11.5px; letter-spacing: 0.04em; text-transform: uppercase; color: var(--muted) }
+.kpi .val { font: 600 24px var(--f-num); margin-top: 2px; font-variant-numeric: tabular-nums }
+.kpi .note { font-size: 12px; color: var(--muted) }
+.num { font-family: var(--f-num); font-variant-numeric: tabular-nums }
+.btn { font: 600 13px var(--f-ui); border: 1px solid var(--line); background: var(--surface); color: var(--ink); border-radius: 8px; padding: 8px 12px; cursor: pointer }
+.btn.primary { background: var(--accent); color: var(--accent-ink); border-color: var(--accent) }
+.btn:disabled { opacity: 0.5; cursor: not-allowed }
+.chips { display: flex; flex-wrap: wrap; gap: 6px }
+.chip { font: 600 12.5px var(--f-ui); border: 1px solid var(--line); background: var(--surface); color: var(--ink); border-radius: 999px; padding: 6px 11px; cursor: pointer }
+.chip[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: var(--accent-ink) }
+.chip .n { font-family: var(--f-num); opacity: 0.75; margin-left: 4px }
+.pill { display: inline-block; font-size: 11.5px; font-weight: 600; border-radius: 999px; padding: 2px 8px; white-space: nowrap }
+.pill.good { background: var(--good-soft); color: var(--good) }
+.pill.warn { background: var(--warn-soft); color: var(--warn) }
+.pill.bad { background: var(--bad-soft); color: var(--bad) }
+.pill.mute { background: var(--surface-2); color: var(--muted) }
+.scroll { overflow-x: auto }
+table { border-collapse: collapse; width: 100%; font-size: 13px }
+th { text-align: left; font-size: 11.5px; letter-spacing: 0.03em; text-transform: uppercase; color: var(--muted); font-weight: 600; padding: 8px; border-bottom: 1px solid var(--line); white-space: nowrap }
+td { padding: 8px; border-bottom: 1px solid var(--line); vertical-align: top }
+tr.click { cursor: pointer }
+tr.click:hover td { background: var(--surface-2) }
+td.heat { text-align: center; font-family: var(--f-num); font-variant-numeric: tabular-nums; font-size: 12.5px; min-width: 64px }
+.bars { display: grid; gap: 10px }
+.bar { display: grid; grid-template-columns: minmax(120px, 230px) 1fr 58px; align-items: center; gap: 10px; font-size: 13px }
+.bar .track { height: 14px; background: var(--surface-2); border-radius: 4px; overflow: hidden; display: flex }
+.bar .fill { height: 100%; background: var(--accent) }
+.bar .v { text-align: right; font-family: var(--f-num); font-variant-numeric: tabular-nums }
+.bar.top .lab { font-weight: 700 }
+.legend { display: flex; flex-wrap: wrap; gap: 6px 14px; font-size: 12px; color: var(--muted); margin-top: 10px }
+.legend i { display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-right: 5px; vertical-align: -1px }
+.empty { text-align: center; padding: 28px 12px; color: var(--muted) }
+.empty strong { color: var(--ink); display: block; font-size: 15px; margin-bottom: 4px }
+.toolbar { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 16px }
+.toggle { display: inline-flex; align-items: center; gap: 6px; font-size: 13px }
+select, input[type=text], textarea { font: 14px var(--f-ui); color: var(--ink); background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 8px 10px; width: 100% }
+textarea { min-height: 70px; resize: vertical }
+label.f { display: grid; gap: 4px; font-size: 12.5px; color: var(--muted); font-weight: 600 }
+.form-grid { display: grid; gap: 12px; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)) }
+.sec-h { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: baseline; gap: 8px; margin: 6px 0 8px }
+.sec-h h3 { font-size: 14px; margin: 0 }
+.pair { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 10px; padding: 8px 0; border-top: 1px solid var(--line) }
+.pair .l { text-align: right; font-size: 13px }
+.pair .r { font-size: 13px }
+.scale { display: flex; gap: 3px }
+.scale button { width: 32px; height: 32px; border: 1px solid var(--line); background: var(--surface); color: var(--muted); border-radius: 6px; font: 600 12px var(--f-num); cursor: pointer }
+.scale button.eq { border-style: dashed }
+.scale button[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: var(--accent-ink) }
+.pair .no { font: 11px var(--f-num); color: var(--muted) }
+.crit-h { font-size: 12.5px; font-weight: 700; color: var(--accent); margin-top: 12px }
+.mine { display: grid; gap: 16px; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)) }
+.mine h3 { font-size: 13.5px; margin: 0 0 8px }
+.hint { font-size: 12.5px; margin-top: 8px; color: var(--warn) }
+.progress { position: sticky; bottom: env(safe-area-inset-bottom, 0px); z-index: 4; background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 10px 14px; display: flex; flex-wrap: wrap; gap: 8px 16px; align-items: center; box-shadow: 0 -6px 18px color-mix(in srgb, var(--ink) 8%, transparent) }
+.progress .meter { flex: 1 1 160px; height: 8px; background: var(--surface-2); border-radius: 99px; overflow: hidden }
+.progress .meter div { height: 100%; background: var(--accent) }
+.pair.flag { background: var(--warn-soft); border-radius: 6px }
+.dz { border: 2px dashed var(--line); border-radius: var(--r); padding: 24px; text-align: center; color: var(--muted) }
+.dz.over { border-color: var(--accent); background: var(--accent-soft) }
+.quote { border-left: 3px solid var(--line); padding: 4px 10px; margin: 6px 0; font-size: 13px }
+.quote .who { color: var(--muted); font-size: 11.5px }
+.small { font-size: 12px; color: var(--muted) }
+.mt { margin-top: 12px }
+@media (max-width: 640px) {
+  .pair { grid-template-columns: 1fr; gap: 6px }
+  .pair .l { text-align: left }
+  .scale button { width: 28px; height: 30px }
+  .bar { grid-template-columns: 1fr 52px; }
+  .bar .lab { grid-column: 1 / -1 }
+}
+@media (prefers-reduced-motion: no-preference) { .bar .fill, .bar .seg { transition: width .35s ease } }
+</style>
+
+<header class="top">
+  <div class="wrap">
+    <div class="toprow">
+      <div class="brand">
+        <h1>Dasbor AHP Hilirisasi</h1>
+        <p>FGD komoditas · Kajian Pendahuluan Kerangka Kebijakan Hilirisasi Mineral, Batubara, Minyak dan Gas Bumi</p>
+      </div>
+      <div class="live"><span class="dot" id="dot"></span><span id="liveText">Menghubungkan…</span></div>
+    </div>
+    <nav class="tabs" role="tablist" aria-label="Bagian dasbor">
+      <button role="tab" id="tab-ringkasan" data-view="ringkasan" aria-selected="true">Ringkasan</button>
+      <button role="tab" id="tab-komoditas" data-view="komoditas" aria-selected="false">Per komoditas</button>
+      <button role="tab" id="tab-isi" data-view="isi" aria-selected="false">Isi instrumen</button>
+      <button role="tab" id="tab-impor" data-view="impor" aria-selected="false">Impor Excel</button>
+    </nav>
+  </div>
+</header>
+
+<div class="wrap">
+<main>
+  <div id="sampleBanner" class="banner warn" hidden>
+    <strong>Data contoh.</strong><span>Angka di bawah dibuat acak untuk memperlihatkan cara kerja dasbor, bukan jawaban responden.</span>
+    <button class="btn" id="sampleOff">Kembali ke data nyata</button>
+  </div>
+  <div id="dbBanner" class="banner info" hidden></div>
+
+  <!-- ===================== RINGKASAN ===================== -->
+  <section id="view-ringkasan" class="grid">
+    <div class="kpis" id="kpis"></div>
+    <div class="panel">
+      <h2>Prioritas per komoditas</h2>
+      <p class="sub">Bobot gabungan semua responden (rata-rata geometrik). Klik baris untuk melihat rincian komoditas.</p>
+      <div class="scroll"><table id="sumTable"></table></div>
+    </div>
+    <div class="grid g2">
+      <div class="panel">
+        <h2>Bobot kriteria antarkomoditas</h2>
+        <p class="sub">Semakin gelap, semakin penting kriteria itu bagi komoditas tersebut.</p>
+        <div class="scroll"><table id="heatK"></table></div>
+      </div>
+      <div class="panel">
+        <h2>Efektivitas instrumen kebijakan antarkomoditas</h2>
+        <p class="sub">Semakin gelap, semakin efektif instrumen menurut responden.</p>
+        <div class="scroll"><table id="heatI"></table></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== PER KOMODITAS ===================== -->
+  <section id="view-komoditas" class="grid" hidden>
+    <div class="panel">
+      <div class="chips" id="fgdChips" role="group" aria-label="Pilih FGD"></div>
+      <div class="toolbar mt">
+        <label class="toggle"><span>Kelompok responden</span>
+          <select id="grpSel" style="width:auto">
+            <option value="">Semua kelompok</option>
+          </select>
+        </label>
+        <label class="toggle"><input type="checkbox" id="onlyCons"> Hanya jawaban konsisten (CR ≤ 0,10)</label>
+      </div>
+    </div>
+    <div class="kpis" id="kpisK"></div>
+    <div class="grid g2">
+      <div class="panel"><h2>Bobot kriteria</h2><p class="sub">Apa yang paling penting dalam memilih strategi hilirisasi komoditas ini.</p><div class="bars" id="barsK"></div></div>
+      <div class="panel"><h2>Prioritas jalur hilirisasi</h2><p class="sub">Skor global; warna menunjukkan sumbangan setiap kriteria.</p><div class="bars" id="barsA"></div><div class="legend" id="legA"></div></div>
+      <div class="panel"><h2>Efektivitas instrumen kebijakan</h2><p class="sub">Instrumen yang dinilai paling mendorong hilirisasi komoditas ini.</p><div class="bars" id="barsI"></div></div>
+      <div class="panel"><h2>Perbandingan kelompok responden</h2><p class="sub">Jalur dan instrumen teratas menurut setiap kelompok.</p><div class="scroll"><table id="grpTable"></table></div></div>
+    </div>
+    <div class="panel"><h2>Responden</h2><p class="sub">CR di atas 0,10 berarti jawaban kurang konsisten dan sebaiknya ditinjau.</p><div class="scroll"><table id="respTable"></table></div></div>
+    <div class="panel"><h2>Jawaban singkat (Bagian D)</h2><p class="sub" id="dSub"></p><div id="dList"></div></div>
+  </section>
+
+  <!-- ===================== ISI INSTRUMEN ===================== -->
+  <section id="view-isi" class="grid" hidden>
+    <div class="panel">
+      <h2>Isi instrumen AHP</h2>
+      <p class="sub">Pilih angka di sisi pilihan yang lebih penting: 3 sedikit lebih penting, 5 lebih penting, 7 jauh lebih penting, 9 mutlak lebih penting. Pilih 1 bila sama penting. Jawaban dapat diubah kapan saja.</p>
+      <div class="form-grid">
+        <label class="f">FGD<select id="fFgd"></select></label>
+        <label class="f">Kelompok<select id="fGrp"><option value="">Pilih kelompok</option></select></label>
+        <label class="f">Institusi/perusahaan<input type="text" id="fInst" autocomplete="organization"></label>
+        <label class="f">Jabatan/unit<input type="text" id="fJab"></label>
+      </div>
+      <p class="small mt" id="fStatus"></p>
+      <p class="small">Tautan langsung untuk responden FGD ini: tambahkan <span class="num" id="fLink">#isi-f1</span> pada alamat dasbor.</p>
+    </div>
+    <div class="panel" id="formA"></div>
+    <div class="panel" id="formB"></div>
+    <div class="panel" id="formC"></div>
+    <div class="panel" id="formD"></div>
+    <div class="panel"><h2>Hasil penilaian Anda</h2><p class="sub">Dihitung otomatis setiap kali Anda memilih angka. Bila tertulis "Perlu ditinjau", periksa perbandingan yang ditandai kuning.</p><div class="mine" id="formRes"></div></div>
+    <div class="progress" id="fProg">
+      <span class="small" id="fProgText"></span><div class="meter"><div id="fProgBar" style="width:0%"></div></div>
+      <button class="btn primary" id="fSubmit">Simpan jawaban</button>
+      <span class="small" id="fMsg"></span>
+    </div>
+  </section>
+
+  <!-- ===================== IMPOR EXCEL ===================== -->
+  <section id="view-impor" class="grid" hidden>
+    <div class="panel">
+      <h2>Impor berkas Excel instrumen</h2>
+      <p class="sub">Unggah berkas Instrumen_AHP_FGD_Hilirisasi.xlsx yang sudah diisi responden. Setiap lembar FGD yang terisi dibaca sebagai satu jawaban. Berkas yang sama tidak tersimpan dua kali.</p>
+      <div class="dz" id="dz"><p><strong>Tarik berkas .xlsx ke sini</strong></p><p>atau</p><input type="file" id="fileIn" accept=".xlsx" multiple aria-label="Pilih berkas Excel"></div>
+      <div id="impPreview" class="mt"></div>
+      <div class="toolbar mt"><button class="btn primary" id="impSave" disabled>Simpan ke dasbor</button><span class="small" id="impMsg"></span></div>
+    </div>
+    <div class="panel"><h2>Jawaban hasil impor</h2><p class="sub">Hanya editor kajian yang dapat menghapus.</p><div class="scroll"><table id="impTable"></table></div></div>
+  </section>
+</main>
+</div>
+
+<script>
+const META = {"crit": [{"k": "K1", "n": "Nilai tambah dan kedalaman industri", "d": "Seberapa jauh jalur ini membuat produk naik kelas dari bahan mentah/produk antara menjadi produk akhir, dan menghidupkan industri pengguna di dalam negeri."}, {"k": "K2", "n": "Daya saing dan akses pasar", "d": "Peluang produk terjual dengan harga bersaing di pasar domestik dan ekspor, termasuk syarat pembeli (perjanjian dagang, jejak karbon)."}, {"k": "K3", "n": "Tenaga kerja dan manfaat daerah", "d": "Jumlah dan mutu lapangan kerja serta manfaat bagi pemasok, UMKM, dan penerimaan daerah."}, {"k": "K4", "n": "Kesiapan bahan baku, energi, dan infrastruktur", "d": "Ketersediaan bahan baku yang pasti, listrik/gas dengan harga wajar, pelabuhan, dan kawasan industri."}, {"k": "K5", "n": "Keberlanjutan lingkungan dan sosial", "d": "Dampak terhadap lingkungan (emisi, limbah/tailing, lahan) dan penerimaan masyarakat sekitar."}], "instr": [{"k": "I1", "n": "Pengendalian ekspor bahan mentah", "d": "Larangan atau pembatasan ekspor, bea keluar berjenjang menurut tingkat pengolahan."}, {"k": "I2", "n": "Insentif fiskal bertahap", "d": "Tax holiday, pembebasan bea masuk, dan fasilitas KEK yang makin besar bila produk makin hilir."}, {"k": "I3", "n": "Infrastruktur dan energi", "d": "Listrik (terutama rendah karbon), gas, pelabuhan, dan kawasan industri/KEK yang siap pakai."}, {"k": "I4", "n": "Pasar domestik dan industri pengguna", "d": "Kontrak pasokan ke industri pengguna dalam negeri, TKDN, dan belanja pemerintah."}, {"k": "I5", "n": "Diplomasi ekonomi dan akses pasar", "d": "Perjanjian dagang, penyelesaian sengketa, sertifikasi jejak karbon dan ketertelusuran."}], "fgd": [{"code": "F1", "kom": "Batubara", "tgl": "Rab, 28 Okt 2026", "alts": [{"k": "A1", "n": "Gasifikasi menjadi DME dan metanol", "d": "Substitusi impor LPG dan bahan kimia dasar."}, {"k": "A2", "n": "Kokas dan produk karbon untuk industri logam", "d": "Kokas untuk smelter nikel dan pabrik baja."}, {"k": "A3", "n": "Produk kimia turunan batubara", "d": "Amonia/pupuk, tar batubara dan turunannya."}], "qs": ["Pada harga batubara dan harga produk berapa proyek DME atau kokas menjadi layak secara bisnis?", "Apa hambatan terbesar proyek hilirisasi batubara yang sedang berjalan (teknologi, pendanaan, harga, pembeli)?", "Bagaimana sebaiknya bea keluar batubara dirancang agar mendorong pengolahan di dalam negeri tanpa mengganggu penerimaan negara?", "Kebijakan apa yang paling perlu diubah dalam dua tahun ke depan agar hilirisasi komoditas ini naik kelas?"]}, {"code": "F2", "kom": "Minyak dan Gas Bumi", "tgl": "Kam, 29 Okt 2026", "alts": [{"k": "A1", "n": "Kapasitas dan kompleksitas kilang", "d": "Meningkatkan produksi BBM dalam negeri dan mengurangi impor."}, {"k": "A2", "n": "Integrasi kilang–petrokimia", "d": "Olefin, aromatik, dan metanol untuk industri plastik dan kimia."}, {"k": "A3", "n": "Gas bumi untuk industri dan pupuk", "d": "Pemanfaatan gas domestik untuk amonia, pupuk, dan industri pengguna."}], "qs": ["Berapa tambahan kapasitas kilang dan petrokimia yang sudah pasti beroperasi hingga 2030?", "Seberapa besar Harga Gas Bumi Tertentu (HGBT) menaikkan daya saing industri pengguna? Mohon contoh angka bila ada.", "Produk petrokimia impor apa yang paling layak diproduksi di dalam negeri dalam lima tahun ke depan?", "Kebijakan apa yang paling perlu diubah dalam dua tahun ke depan agar hilirisasi komoditas ini naik kelas?"]}, {"code": "F3", "kom": "Besi dan Baja", "tgl": "Sen, 2 Nov 2026", "alts": [{"k": "A1", "n": "Baja karbon hulu–hilir", "d": "Slab, baja canai panas dan dingin untuk menggantikan impor."}, {"k": "A2", "n": "Baja nirkarat lanjutan", "d": "Mengolah slab nirkarat menjadi lembaran, pipa, dan produk fabrikasi."}, {"k": "A3", "n": "Barang jadi dari besi dan baja", "d": "Pipa, struktur, komponen otomotif dan mesin (HS Bab 73)."}], "qs": ["Berapa utilisasi pabrik Bapak/Ibu dan produk baja impor apa yang paling besar menekan industri dalam negeri?", "Apa yang menghambat slab baja nirkarat diolah lebih lanjut di dalam negeri?", "Produk baja apa yang belum memiliki kode HS atau data yang memadai untuk dipantau?", "Kebijakan apa yang paling perlu diubah dalam dua tahun ke depan agar hilirisasi komoditas ini naik kelas?"]}, {"code": "F4", "kom": "Nikel", "tgl": "Sel, 10 Nov 2026", "alts": [{"k": "A1", "n": "Jalur baja nirkarat", "d": "Feronikel/NPI menjadi baja nirkarat dan produk turunannya."}, {"k": "A2", "n": "Jalur baterai kendaraan listrik", "d": "MHP/nikel sulfat menjadi prekursor, katoda, dan sel baterai."}, {"k": "A3", "n": "Logam nikel murni dan paduan", "d": "Nikel kelas satu dan paduan khusus untuk industri."}], "qs": ["Berapa lama cadangan bijih nikel kadar tinggi (saprolit) dapat memenuhi kapasitas smelter yang ada?", "Perlukah moratorium pembangunan smelter baru yang hanya menghasilkan produk setengah jadi? Jika ya, dengan syarat apa?", "Apa kendala utama pasokan MHP/nikel sulfat ke pabrik prekursor dan katoda di dalam negeri?", "Kebijakan apa yang paling perlu diubah dalam dua tahun ke depan agar hilirisasi komoditas ini naik kelas?"]}, {"code": "F5", "kom": "Kobalt", "tgl": "Kam, 12 Nov 2026", "alts": [{"k": "A1", "n": "Kobalt sulfat untuk baterai domestik", "d": "Memasok prekursor baterai di dalam negeri."}, {"k": "A2", "n": "Logam dan serbuk kobalt", "d": "Untuk paduan logam dan industri lain."}, {"k": "A3", "n": "Daur ulang baterai", "d": "Memulihkan kobalt, nikel, dan litium dari baterai bekas."}], "qs": ["Berapa volume kobalt (dalam MHP, hidroksida, atau sulfat) yang dihasilkan saat ini dan ke mana dijual?", "Apa syarat agar pembeli dalam negeri (pabrik prekursor) mau menyerap kobalt domestik?", "Standar jejak karbon dan ketertelusuran apa yang diminta pembeli luar negeri?", "Kebijakan apa yang paling perlu diubah dalam dua tahun ke depan agar hilirisasi komoditas ini naik kelas?"]}, {"code": "F6", "kom": "Mangan", "tgl": "Sel, 17 Nov 2026", "alts": [{"k": "A1", "n": "Feromangan dan silikomangan", "d": "Bahan paduan untuk industri baja."}, {"k": "A2", "n": "Mangan sulfat kemurnian tinggi", "d": "Bahan katoda baterai kendaraan listrik."}, {"k": "A3", "n": "Penguatan basis sumber daya", "d": "Eksplorasi, pencatatan cadangan, dan neraca mangan."}], "qs": ["Dari mana sumber bijih mangan untuk produksi feromangan saat ini (domestik atau impor) dan berapa porsinya?", "Seberapa besar peluang mangan sulfat untuk baterai di Indonesia, dan apa syarat teknologinya?", "Data cadangan dan produksi mangan apa yang paling dibutuhkan namun belum tersedia?", "Kebijakan apa yang paling perlu diubah dalam dua tahun ke depan agar hilirisasi komoditas ini naik kelas?"]}, {"code": "F7", "kom": "Bauksit dan Aluminium", "tgl": "Sel, 24 Nov 2026", "alts": [{"k": "A1", "n": "Perluasan kapasitas alumina", "d": "Mengolah bauksit menjadi alumina (smelter grade dan chemical grade)."}, {"k": "A2", "n": "Aluminium primer rendah karbon", "d": "Smelter aluminium dengan listrik rendah karbon."}, {"k": "A3", "n": "Produk aluminium hilir", "d": "Lembaran, foil, ekstrusi, dan kabel."}], "qs": ["Berapa kapasitas dan utilisasi pabrik alumina saat ini, serta rencana tambahannya hingga 2030?", "Berapa porsi biaya listrik dalam produksi aluminium dan dari mana sumber listriknya?", "Apa kendala pasokan aluminium primer ke industri hilir di dalam negeri?", "Kebijakan apa yang paling perlu diubah dalam dua tahun ke depan agar hilirisasi komoditas ini naik kelas?"]}, {"code": "F8", "kom": "Tembaga", "tgl": "Sen, 30 Nov 2026", "alts": [{"k": "A1", "n": "Operasi penuh smelter dan katoda", "d": "Memastikan seluruh konsentrat diolah menjadi katoda."}, {"k": "A2", "n": "Industri pengguna katoda", "d": "Batang, kawat, kabel, dan foil tembaga untuk baterai."}, {"k": "A3", "n": "Produk samping bernilai tinggi", "d": "Emas, perak, lumpur anoda, dan asam sulfat."}], "qs": ["Berapa utilisasi smelter saat ini dan berapa konsentrat yang masih diekspor?", "Berapa katoda yang terserap industri dalam negeri dan apa hambatannya?", "Produk tembaga impor apa yang paling layak diproduksi di dalam negeri?", "Kebijakan apa yang paling perlu diubah dalam dua tahun ke depan agar hilirisasi komoditas ini naik kelas?"]}, {"code": "F9", "kom": "Litium", "tgl": "Rab, 2 Des 2026", "alts": [{"k": "A1", "n": "Pemurnian litium dari bahan impor", "d": "Spodumen/konsentrat impor diolah menjadi litium hidroksida atau karbonat."}, {"k": "A2", "n": "Manufaktur sel baterai", "d": "Fokus pada sel LFP/NMC dengan bahan baku impor."}, {"k": "A3", "n": "Pengamanan pasokan", "d": "Eksplorasi sumber domestik dan kemitraan pasokan luar negeri."}], "qs": ["Dari negara mana bahan baku litium diperoleh, dalam bentuk apa, dan berapa harganya?", "Berapa kebutuhan litium industri baterai di Indonesia hingga 2030?", "Kode HS apa yang digunakan saat mengimpor atau mengekspor bahan litium?", "Kebijakan apa yang paling perlu diubah dalam dua tahun ke depan agar hilirisasi komoditas ini naik kelas?"]}, {"code": "F10", "kom": "Timah dan Logam Tanah Jarang", "tgl": "Jum, 4 Des 2026", "alts": [{"k": "A1", "n": "Produk hilir timah", "d": "Solder, bahan kimia timah, dan pelat timah (tinplate)."}, {"k": "A2", "n": "Pengolahan monasit menjadi logam tanah jarang", "d": "Pemisahan dan pemurnian oksida logam tanah jarang."}, {"k": "A3", "n": "Mineral ikutan lain", "d": "Zirkon, ilmenit, dan senotim dari penambangan timah."}], "qs": ["Berapa persen timah yang diolah menjadi produk hilir di dalam negeri dan apa hambatannya?", "Berapa volume monasit yang tersimpan dan regulasi apa yang menghambat pengolahannya?", "Kemitraan teknologi seperti apa yang dibutuhkan untuk mengolah logam tanah jarang?", "Kebijakan apa yang paling perlu diubah dalam dua tahun ke depan agar hilirisasi komoditas ini naik kelas?"]}, {"code": "F11", "kom": "Pasir Silika", "tgl": "Sen, 7 Des 2026", "alts": [{"k": "A1", "n": "Kaca lembaran dan kaca pengaman", "d": "Untuk bangunan dan otomotif."}, {"k": "A2", "n": "Kaca surya dan silikon", "d": "Rantai pasok panel surya: kaca surya, silikon metalurgi, polisilikon."}, {"k": "A3", "n": "Bahan industri berbasis silika", "d": "Silika olahan dan natrium silikat untuk industri kimia."}], "qs": ["Berapa volume pasir silika yang memenuhi spesifikasi kaca dan kaca surya, dan di mana lokasinya?", "Bagaimana dampak rencana penataan izin pasir kuarsa terhadap pasokan industri?", "Berapa kebutuhan pasir silika industri kaca surya dan silikon hingga 2030?", "Kebijakan apa yang paling perlu diubah dalam dua tahun ke depan agar hilirisasi komoditas ini naik kelas?"]}]};
+const RI = { 3: 0.58, 5: 1.12 };
+const GROUPS = ["Pemerintah pusat", "Pemerintah daerah", "BUMN", "Swasta", "Asosiasi", "Akademisi/peneliti", "Lainnya"];
+const KCOL = ["var(--k1)", "var(--k2)", "var(--k3)", "var(--k4)", "var(--k5)"];
+const SCALE = [9, 7, 5, 3, 1, 3, 5, 7, 9];
+const NA = 10, NB = 15, NC = 10;
+const $ = (s) => document.querySelector(s);
+const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const pct = (x) => (x == null || isNaN(x) ? "–" : (x * 100).toFixed(1).replace(".", ",") + "%");
+const dec = (x, d = 2) => (x == null || isNaN(x) ? "–" : x.toFixed(d).replace(".", ","));
+const fgdBy = Object.fromEntries(META.fgd.map((f) => [f.code, f]));
+
+/* ---------------- AHP math ---------------- */
+function pairs(n) { const p = []; for (let i = 0; i < n; i++) for (let j = i + 1; j < n; j++) p.push([i, j]); return p; }
+function ahp(vals, n) {
+  // vals: pair values (left over right) in combination order; returns {w, cr}
+  const P = pairs(n), M = Array.from({ length: n }, () => Array(n).fill(1));
+  P.forEach(([i, j], k) => { const v = vals[k] || 1; M[i][j] = v; M[j][i] = 1 / v; });
+  const gm = M.map((r) => Math.pow(r.reduce((a, b) => a * b, 1), 1 / n));
+  const s = gm.reduce((a, b) => a + b, 0), w = gm.map((g) => g / s);
+  const lam = M.reduce((acc, r, i) => acc + r.reduce((a, v, j) => a + v * w[j], 0) / w[i], 0) / n;
+  return { w, cr: n > 2 ? (lam - n) / (n - 1) / RI[n] : 0 };
+}
+const complete = (arr, len) => Array.isArray(arr) && arr.length === len && arr.every((v) => typeof v === "number" && v > 0);
+function evalEntry(e) {
+  const r = { A: null, B: null, C: null, crB: null };
+  if (complete(e.A, NA)) r.A = ahp(e.A, 5);
+  if (complete(e.B, NB)) { r.B = [0, 1, 2, 3, 4].map((c) => ahp(e.B.slice(c * 3, c * 3 + 3), 3)); r.crB = Math.max(...r.B.map((x) => x.cr)); }
+  if (complete(e.C, NC)) r.C = ahp(e.C, 5);
+  r.ok = (!r.A || r.A.cr <= 0.1) && (r.crB == null || r.crB <= 0.1) && (!r.C || r.C.cr <= 0.1);
+  return r;
+}
+function geoAgg(list, key, len) {
+  const rows = list.filter((e) => complete(e[key], len)).map((e) => e[key]);
+  if (!rows.length) return null;
+  return Array.from({ length: len }, (_, k) => Math.exp(rows.reduce((a, r) => a + Math.log(r[k]), 0) / rows.length));
+}
+function aggregate(list) {
+  const A = geoAgg(list, "A", NA), B = geoAgg(list, "B", NB), C = geoAgg(list, "C", NC);
+  const out = { nA: list.filter((e) => complete(e.A, NA)).length, nB: list.filter((e) => complete(e.B, NB)).length, nC: list.filter((e) => complete(e.C, NC)).length };
+  out.A = A ? ahp(A, 5) : null; out.C = C ? ahp(C, 5) : null;
+  out.B = B ? [0, 1, 2, 3, 4].map((c) => ahp(B.slice(c * 3, c * 3 + 3), 3)) : null;
+  if (out.A && out.B) {
+    out.alt = [0, 1, 2].map((a) => ({ total: out.B.reduce((s, b, c) => s + out.A.w[c] * b.w[a], 0), parts: out.B.map((b, c) => out.A.w[c] * b.w[a]) }));
+  } else out.alt = null;
+  out.crB = out.B ? Math.max(...out.B.map((x) => x.cr)) : null;
+  return out;
+}
+const argmax = (a) => a.reduce((bi, v, i) => (v > a[bi] ? i : bi), 0);
+
+/* ---------------- state ---------------- */
+const S = { live: [], sample: null, useSample: false, view: "ringkasan", fgd: META.fgd[0].code, grp: "", onlyCons: false,
+  db: null, user: null, uid: null, canWrite: null, canEdit: false, myDoc: null, form: null, imp: [] };
+const entries = () => (S.useSample ? S.sample : S.live);
+const byFgd = (code) => entries().filter((e) => e.fgd === code);
+
+/* ---------------- sample data (in memory only) ---------------- */
+function makeSample() {
+  let seed = 7; const rnd = () => ((seed = (seed * 16807) % 2147483647) / 2147483647);
+  const snap = (r) => { const x = Math.max(1 / 9, Math.min(9, r)); const opts = [1/9, 1/7, 1/5, 1/3, 1, 3, 5, 7, 9]; return opts.reduce((b, o) => (Math.abs(Math.log(o) - Math.log(x)) < Math.abs(Math.log(b) - Math.log(x)) ? o : b), 1); };
+  const fromW = (w) => pairs(w.length).map(([i, j]) => snap((w[i] / w[j]) * Math.exp((rnd() - 0.5) * 0.35)));
+  const out = [];
+  META.fgd.forEach((f, fi) => {
+    const baseK = [5, 4, 3, 3.5, 2.5].map((x, i) => x * (1 + 0.6 * Math.sin(fi + i)));
+    const baseI = [3, 4, 4.5, 3.5, 2].map((x, i) => x * (1 + 0.5 * Math.cos(fi * 2 + i)));
+    const n = 6 + (fi % 4);
+    for (let r = 0; r < n; r++) {
+      const jitter = (b) => b.map((x) => Math.max(0.5, x * (0.6 + rnd() * 0.8)));
+      const B = []; for (let c = 0; c < 5; c++) B.push(...fromW(jitter([3 + c * 0.3 * (fi % 3), 2 + rnd() * 2, 1.5 + (c % 2)])));
+      out.push({ id: `contoh-${f.code}-${r}`, fgd: f.code, kelompok: GROUPS[r % 6], institusi: "Responden contoh " + (r + 1), jabatan: "", src: "contoh",
+        A: fromW(jitter(baseK)), B, C: fromW(jitter(baseI)), D: r < 2 ? ["Contoh jawaban singkat untuk memperlihatkan tampilan.", "", "", ""] : ["", "", "", ""], ts: Date.now() - r * 3600e3 });
+    }
+  });
+  return out;
+}
+
+/* ---------------- render helpers ---------------- */
+function bars(el, items, opts = {}) {
+  if (!items) { el.innerHTML = `<div class="empty"><strong>Belum ada jawaban lengkap</strong>Bagian ini tampil setelah ada responden yang menyelesaikan bagian tersebut.</div>`; return; }
+  const max = Math.max(...items.map((x) => x.v)), top = argmax(items.map((x) => x.v));
+  el.innerHTML = items.map((x, i) => {
+    const fill = x.parts
+      ? x.parts.map((p, c) => `<div class="seg" style="width:${(p / max) * 100}%;background:${KCOL[c]}" title="${esc(META.crit[c].n)}: ${pct(p)}"></div>`).join("")
+      : `<div class="fill" style="width:${(x.v / max) * 100}%;background:${x.color || "var(--accent)"}"></div>`;
+    return `<div class="bar ${i === top ? "top" : ""}"><div class="lab">${esc(x.label)}</div><div class="track">${fill}</div><div class="v">${pct(x.v)}</div></div>`;
+  }).join("");
+}
+function crPill(cr) {
+  if (cr == null) return `<span class="pill mute">–</span>`;
+  return cr <= 0.1 ? `<span class="pill good">CR ${dec(cr)}</span>` : `<span class="pill bad">CR ${dec(cr)}</span>`;
+}
+function heatCell(v, col = "var(--accent)") {
+  if (v == null) return `<td class="heat" style="color:var(--muted)">–</td>`;
+  const a = Math.round(Math.min(1, v / 0.45) * 85);
+  return `<td class="heat" style="background:color-mix(in srgb, ${col} ${a}%, var(--surface));color:${a > 50 ? "var(--accent-ink)" : "var(--ink)"}">${pct(v)}</td>`;
+}
+
+/* ---------------- views ---------------- */
+function renderSummary() {
+  const all = entries(), ev = all.map(evalEntry);
+  const cons = ev.filter((r) => r.ok).length, fgdWith = new Set(all.map((e) => e.fgd)).size;
+  const last = all.reduce((m, e) => Math.max(m, e.ts || 0), 0);
+  const grpCount = {}; all.forEach((e) => (grpCount[e.kelompok || "Lainnya"] = (grpCount[e.kelompok || "Lainnya"] || 0) + 1));
+  const topGrp = Object.entries(grpCount).sort((a, b) => b[1] - a[1])[0];
+  $("#kpis").innerHTML = [
+    ["Jawaban masuk", all.length, last ? "terakhir " + new Date(last).toLocaleString("id-ID", { dateStyle: "medium", timeStyle: "short" }) : "belum ada"],
+    ["FGD berjawaban", `${fgdWith}/${META.fgd.length}`, "komoditas yang sudah dinilai"],
+    ["Jawaban konsisten", all.length ? pct(cons / all.length) : "–", `${cons} dari ${all.length} (CR ≤ 0,10)`],
+    ["Kelompok terbanyak", topGrp ? topGrp[1] : "–", topGrp ? topGrp[0] : "belum ada"],
+  ].map(([l, v, n]) => `<div class="kpi"><div class="lab">${l}</div><div class="val">${esc(v)}</div><div class="note">${esc(n)}</div></div>`).join("");
+
+  const rows = META.fgd.map((f) => ({ f, list: byFgd(f.code) })).map((x) => ({ ...x, agg: aggregate(x.list) }));
+  $("#sumTable").innerHTML = `<thead><tr><th>FGD</th><th>Komoditas</th><th>Responden</th><th>Kriteria terpenting</th><th>Jalur prioritas</th><th>Instrumen paling efektif</th><th>Konsistensi gabungan</th></tr></thead><tbody>` +
+    rows.map(({ f, list, agg }) => {
+      const k = agg.A ? META.crit[argmax(agg.A.w)] : null, a = agg.alt ? f.alts[argmax(agg.alt.map((x) => x.total))] : null, ins = agg.C ? META.instr[argmax(agg.C.w)] : null;
+      const crs = [agg.A?.cr, agg.crB, agg.C?.cr].filter((x) => x != null), crMax = crs.length ? Math.max(...crs) : null;
+      return `<tr class="click" data-fgd="${f.code}" tabindex="0"><td class="num">${f.code}</td><td><strong>${esc(f.kom)}</strong><div class="small">${esc(f.tgl)}</div></td><td class="num">${list.length}</td>
+        <td>${k ? `${esc(k.n)} <span class="small num">${pct(Math.max(...agg.A.w))}</span>` : '<span class="small">belum ada</span>'}</td>
+        <td>${a ? `<strong>${esc(a.n)}</strong> <span class="small num">${pct(Math.max(...agg.alt.map((x) => x.total)))}</span>` : '<span class="small">belum ada</span>'}</td>
+        <td>${ins ? `${esc(ins.n)} <span class="small num">${pct(Math.max(...agg.C.w))}</span>` : '<span class="small">belum ada</span>'}</td>
+        <td>${crPill(crMax)}</td></tr>`;
+    }).join("") + "</tbody>";
+  document.querySelectorAll("#sumTable tr.click").forEach((tr) => {
+    const go = () => { S.fgd = tr.dataset.fgd; setView("komoditas"); };
+    tr.addEventListener("click", go); tr.addEventListener("keydown", (e) => { if (e.key === "Enter") go(); });
+  });
+  const heat = (key, items) => `<thead><tr><th>Komoditas</th>${items.map((x) => `<th title="${esc(x.n)}">${x.k}</th>`).join("")}</tr></thead><tbody>` +
+    rows.map(({ f, agg }) => `<tr><td>${esc(f.kom)}</td>${items.map((_, i) => heatCell(agg[key] ? agg[key].w[i] : null)).join("")}</tr>`).join("") + "</tbody>";
+  $("#heatK").innerHTML = heat("A", META.crit);
+  $("#heatI").innerHTML = heat("C", META.instr);
+  $("#heatK").insertAdjacentHTML("beforeend", `<caption class="small" style="caption-side:bottom;text-align:left;padding-top:8px">${META.crit.map((c) => `${c.k} ${esc(c.n)}`).join(" · ")}</caption>`);
+  $("#heatI").insertAdjacentHTML("beforeend", `<caption class="small" style="caption-side:bottom;text-align:left;padding-top:8px">${META.instr.map((c) => `${c.k} ${esc(c.n)}`).join(" · ")}</caption>`);
+}
+
+function renderKom() {
+  const f = fgdBy[S.fgd];
+  $("#fgdChips").innerHTML = META.fgd.map((x) => `<button class="chip" data-fgd="${x.code}" aria-pressed="${x.code === S.fgd}">${esc(x.kom)}<span class="n">${byFgd(x.code).length}</span></button>`).join("");
+  $("#fgdChips").querySelectorAll("button").forEach((b) => b.addEventListener("click", () => { S.fgd = b.dataset.fgd; renderKom(); }));
+  let list = byFgd(S.fgd);
+  if (S.grp) list = list.filter((e) => e.kelompok === S.grp);
+  const ev = list.map((e) => ({ e, r: evalEntry(e) }));
+  if (S.onlyCons) list = ev.filter((x) => x.r.ok).map((x) => x.e);
+  const agg = aggregate(list);
+  const consN = ev.filter((x) => x.r.ok).length;
+  $("#kpisK").innerHTML = [
+    ["Responden", list.length, `${f.code} · ${f.tgl}`],
+    ["Konsisten", ev.length ? `${consN}/${ev.length}` : "–", "CR ≤ 0,10 di semua bagian"],
+    ["CR gabungan kriteria", dec(agg.A?.cr), agg.A ? (agg.A.cr <= 0.1 ? "konsisten" : "perlu ditinjau") : "belum ada"],
+    ["CR gabungan instrumen", dec(agg.C?.cr), agg.C ? (agg.C.cr <= 0.1 ? "konsisten" : "perlu ditinjau") : "belum ada"],
+  ].map(([l, v, n]) => `<div class="kpi"><div class="lab">${l}</div><div class="val">${esc(v)}</div><div class="note">${esc(n)}</div></div>`).join("");
+  bars($("#barsK"), agg.A ? META.crit.map((c, i) => ({ label: `${c.k} ${c.n}`, v: agg.A.w[i], color: KCOL[i] })) : null);
+  bars($("#barsA"), agg.alt ? f.alts.map((a, i) => ({ label: `${a.k} ${a.n}`, v: agg.alt[i].total, parts: agg.alt[i].parts })) : null);
+  $("#legA").innerHTML = META.crit.map((c, i) => `<span><i style="background:${KCOL[i]}"></i>${c.k} ${esc(c.n)}</span>`).join("");
+  bars($("#barsI"), agg.C ? META.instr.map((c, i) => ({ label: `${c.k} ${c.n}`, v: agg.C.w[i] })) : null);
+
+  const all = byFgd(S.fgd);
+  const groups = [...new Set(all.map((e) => e.kelompok || "Lainnya"))];
+  $("#grpTable").innerHTML = groups.length
+    ? `<thead><tr><th>Kelompok</th><th>n</th><th>Kriteria terpenting</th><th>Jalur prioritas</th><th>Instrumen teratas</th></tr></thead><tbody>` +
+      groups.map((g) => { const a = aggregate(all.filter((e) => (e.kelompok || "Lainnya") === g));
+        return `<tr><td>${esc(g)}</td><td class="num">${all.filter((e) => (e.kelompok || "Lainnya") === g).length}</td>
+        <td>${a.A ? esc(META.crit[argmax(a.A.w)].n) : "–"}</td><td>${a.alt ? esc(f.alts[argmax(a.alt.map((x) => x.total))].n) : "–"}</td><td>${a.C ? esc(META.instr[argmax(a.C.w)].n) : "–"}</td></tr>`; }).join("") + "</tbody>"
+    : `<tbody><tr><td class="empty"><strong>Belum ada responden</strong>Tabel ini membandingkan pandangan pemerintah, pelaku usaha, dan akademisi.</td></tr></tbody>`;
+
+  $("#respTable").innerHTML = ev.length
+    ? `<thead><tr><th>Kelompok</th><th>Institusi</th><th>Kriteria</th><th>Jalur</th><th>Instrumen</th><th>Sumber</th><th>Waktu</th></tr></thead><tbody>` +
+      ev.sort((a, b) => (b.e.ts || 0) - (a.e.ts || 0)).map(({ e, r }) => `<tr><td>${esc(e.kelompok || "–")}</td><td>${esc(e.institusi || "–")}</td><td>${crPill(r.A?.cr)}</td><td>${crPill(r.crB)}</td><td>${crPill(r.C?.cr)}</td>
+        <td><span class="pill mute">${e.src === "excel" ? "Excel" : e.src === "contoh" ? "Contoh" : "Formulir"}</span></td><td class="small">${e.ts ? new Date(e.ts).toLocaleString("id-ID", { dateStyle: "short", timeStyle: "short" }) : "–"}</td></tr>`).join("") + "</tbody>"
+    : `<tbody><tr><td class="empty"><strong>Belum ada responden untuk ${esc(f.kom)}</strong>Jawaban masuk lewat tab Isi instrumen atau Impor Excel dan langsung muncul di sini.</td></tr></tbody>`;
+
+  $("#dSub").textContent = `Pertanyaan pengisi celah data untuk ${f.kom}.`;
+  $("#dList").innerHTML = f.qs.map((q, i) => {
+    const ans = all.filter((e) => e.D && e.D[i] && String(e.D[i]).trim());
+    return `<div class="mt"><div class="crit-h">D${i + 1}. ${esc(q)}</div>${ans.length ? ans.map((e) => `<div class="quote">${esc(e.D[i])}<div class="who">${esc(e.kelompok || "–")}${e.institusi ? " · " + esc(e.institusi) : ""}</div></div>`).join("") : '<div class="small">Belum ada jawaban.</div>'}</div>`;
+  }).join("");
+}
+
+/* ---------------- form ---------------- */
+function blankForm(code) { return { fgd: code, kelompok: "", institusi: "", jabatan: "", A: Array(NA).fill(null), B: Array(NB).fill(null), C: Array(NC).fill(null), D: ["", "", "", ""] }; }
+function valToIdx(v) { if (v == null) return -1; if (v === 1) return 4; const r = v > 1 ? v : 1 / v; const k = [9, 7, 5, 3].indexOf(Math.round(r)); return v > 1 ? k : 8 - k; }
+function idxToVal(i) { return i < 4 ? SCALE[i] : i === 4 ? 1 : 1 / SCALE[i]; }
+let FLAGS = new Set();
+function pairHTML(sec, k, no, left, right, v) {
+  const sel = valToIdx(v), fl = FLAGS.has(sec + k);
+  return `<div class="pair${fl ? " flag" : ""}" ${fl ? `title="Perbandingan ini paling bertentangan dengan jawaban lain di bagian ini"` : ""}><div class="l"><span class="no">${no}.</span> ${esc(left)}</div><div class="scale" role="group" aria-label="${esc(left)} dibanding ${esc(right)}">${SCALE.map((s, i) =>
+    `<button type="button" class="${i === 4 ? "eq" : ""}" data-sec="${sec}" data-k="${k}" data-i="${i}" aria-pressed="${i === sel}" title="${i < 4 ? esc(left) + " lebih penting" : i === 4 ? "Sama penting" : esc(right) + " lebih penting"}">${s}</button>`).join("")}</div><div class="r">${esc(right)}</div></div>`;
+}
+function secStatus(vals, n) {
+  const done = vals.filter((v) => v != null).length;
+  if (done < vals.length) return `<span class="pill mute">${done}/${vals.length} terisi</span>`;
+  if (n === 3) { const crs = [0, 1, 2, 3, 4].map((c) => ahp(vals.slice(c * 3, c * 3 + 3), 3).cr); const m = Math.max(...crs); return m <= 0.1 ? `<span class="pill good">Konsisten · CR ${dec(m)}</span>` : `<span class="pill warn">Perlu ditinjau · CR ${dec(m)}</span>`; }
+  const r = ahp(vals, n); return r.cr <= 0.1 ? `<span class="pill good">Konsisten · CR ${dec(r.cr)}</span>` : `<span class="pill warn">Perlu ditinjau · CR ${dec(r.cr)}</span>`;
+}
+function worstPair(vals, n) {
+  const { w, cr } = ahp(vals, n); if (cr <= 0.1) return -1;
+  let best = -1, dev = -1;
+  pairs(n).forEach(([i, j], k) => { const d = Math.abs(Math.log(vals[k]) - Math.log(w[i] / w[j])); if (d > dev) { dev = d; best = k; } });
+  return best;
+}
+function flagged(F) {
+  const fl = new Set(), full = (a) => a.every((v) => v != null);
+  if (full(F.A)) { const k = worstPair(F.A, 5); if (k >= 0) fl.add("A" + k); }
+  if (full(F.C)) { const k = worstPair(F.C, 5); if (k >= 0) fl.add("C" + k); }
+  for (let c = 0; c < 5; c++) { const v = F.B.slice(c * 3, c * 3 + 3); if (full(v)) { const k = worstPair(v, 3); if (k >= 0) fl.add("B" + (c * 3 + k)); } }
+  return fl;
+}
+function renderMine() {
+  const F = S.form, f = fgdBy[F.fgd], full = (a) => a.every((v) => v != null);
+  const block = (title, html) => `<div><h3>${title}</h3>${html}</div>`;
+  const need = (a) => `<div class="small">Lengkapi ${a.filter((v) => v == null).length} perbandingan lagi untuk melihat hasil.</div>`;
+  const tmp = document.createElement("div");
+  let kHTML, aHTML, iHTML;
+  if (full(F.A)) { const r = ahp(F.A, 5); bars(tmp, META.crit.map((c, i) => ({ label: `${c.k} ${c.n}`, v: r.w[i], color: KCOL[i] }))); kHTML = tmp.innerHTML + `<div class="mt">${crPill(r.cr)}</div>`; } else kHTML = need(F.A);
+  if (full(F.A) && full(F.B)) {
+    const wA = ahp(F.A, 5).w, Bs = [0, 1, 2, 3, 4].map((c) => ahp(F.B.slice(c * 3, c * 3 + 3), 3));
+    const items = f.alts.map((a, ai) => { const parts = Bs.map((b, c) => wA[c] * b.w[ai]); return { label: `${a.k} ${a.n}`, v: parts.reduce((x, y) => x + y, 0), parts }; });
+    bars(tmp, items); aHTML = tmp.innerHTML + `<div class="mt">${crPill(Math.max(...Bs.map((b) => b.cr)))}</div>`;
+  } else aHTML = need([...F.A, ...F.B]);
+  if (full(F.C)) { const r = ahp(F.C, 5); bars(tmp, META.instr.map((c, i) => ({ label: `${c.k} ${c.n}`, v: r.w[i] }))); iHTML = tmp.innerHTML + `<div class="mt">${crPill(r.cr)}</div>`; } else iHTML = need(F.C);
+  $("#formRes").innerHTML = block("Bobot kriteria", kHTML) + block("Prioritas jalur hilirisasi", aHTML) + block("Efektivitas instrumen", iHTML);
+  const n = [...F.A, ...F.B, ...F.C].filter((v) => v != null).length;
+  $("#fProgText").textContent = `${n}/35 perbandingan terisi`;
+  $("#fProgBar").style.width = (n / 35) * 100 + "%";
+}
+function renderForm() {
+  const F = S.form, f = fgdBy[F.fgd];
+  FLAGS = flagged(F);
+  const crit = META.crit.map((c) => `${c.k} ${c.n}`), ins = META.instr.map((c) => `${c.k} ${c.n}`), alt = f.alts.map((a) => `${a.k} ${a.n}`);
+  let no = 1;
+  $("#formA").innerHTML = `<div class="sec-h"><h3>A. Dalam memilih strategi hilirisasi ${esc(f.kom.toLowerCase())}, mana yang lebih penting?</h3>${secStatus(F.A, 5)}</div>` +
+    pairs(5).map(([i, j], k) => pairHTML("A", k, no++, crit[i], crit[j], F.A[k])).join("");
+  let b = `<div class="sec-h"><h3>B. Dilihat dari setiap kriteria, jalur mana yang lebih menjanjikan?</h3>${secStatus(F.B, 3)}</div>`;
+  b += `<p class="small">${f.alts.map((a) => `<strong>${a.k} ${esc(a.n)}</strong>: ${esc(a.d)}`).join("<br>")}</p>`;
+  META.crit.forEach((c, ci) => { b += `<div class="crit-h">Menurut ${c.k} ${esc(c.n)}</div>`; pairs(3).forEach(([i, j], k) => { b += pairHTML("B", ci * 3 + k, no++, alt[i], alt[j], F.B[ci * 3 + k]); }); });
+  $("#formB").innerHTML = b;
+  $("#formC").innerHTML = `<div class="sec-h"><h3>C. Untuk mendorong hilirisasi ${esc(f.kom.toLowerCase())}, instrumen mana yang lebih efektif?</h3>${secStatus(F.C, 5)}</div>` +
+    pairs(5).map(([i, j], k) => pairHTML("C", k, no++, ins[i], ins[j], F.C[k])).join("");
+  $("#formD").innerHTML = `<div class="sec-h"><h3>D. Pertanyaan singkat</h3><span class="pill mute">boleh dengan angka perkiraan</span></div>` +
+    f.qs.map((q, i) => `<label class="f mt" for="fD${i}">D${i + 1}. ${esc(q)}</label><textarea id="fD${i}" data-d="${i}">${esc(F.D[i] || "")}</textarea>`).join("");
+  $("#fGrp").value = F.kelompok; $("#fInst").value = F.institusi; $("#fJab").value = F.jabatan;
+  const answered = [...F.A, ...F.B, ...F.C].filter((v) => v != null).length;
+  renderMine();
+  $("#fFgd").value = F.fgd; $("#fLink").textContent = "#isi-" + F.fgd.toLowerCase();
+  $("#fStatus").textContent = `${answered} dari 35 perbandingan terisi.` + (S.myDoc?.entries?.[F.fgd] ? " Anda sudah pernah menyimpan jawaban untuk FGD ini; menyimpan lagi akan memperbaruinya." : "");
+}
+function loadForm(code) {
+  const mine = S.myDoc?.entries?.[code];
+  S.form = mine ? JSON.parse(JSON.stringify({ ...blankForm(code), ...mine })) : blankForm(code);
+  renderForm();
+}
+document.addEventListener("click", (ev) => {
+  const b = ev.target.closest(".scale button"); if (!b) return;
+  const F = S.form; F[b.dataset.sec][+b.dataset.k] = idxToVal(+b.dataset.i);
+  const y = window.scrollY; renderForm(); window.scrollTo(0, y);
+});
+document.addEventListener("input", (ev) => { if (ev.target.dataset && ev.target.dataset.d != null && S.form) S.form.D[+ev.target.dataset.d] = ev.target.value; });
+$("#fFgd").addEventListener("change", (e) => { loadForm(e.target.value); history.replaceState(null, "", "#isi-" + e.target.value.toLowerCase()); });
+$("#fGrp").addEventListener("change", (e) => (S.form.kelompok = e.target.value));
+$("#fInst").addEventListener("input", (e) => (S.form.institusi = e.target.value));
+$("#fJab").addEventListener("input", (e) => (S.form.jabatan = e.target.value));
+$("#fSubmit").addEventListener("click", async () => {
+  const F = S.form, msg = $("#fMsg");
+  if (!F.kelompok) { msg.textContent = "Pilih kelompok responden terlebih dahulu."; return; }
+  const answered = [...F.A, ...F.B, ...F.C].filter((v) => v != null).length;
+  if (!answered) { msg.textContent = "Isi minimal satu bagian perbandingan sebelum menyimpan."; return; }
+  if (!S.db || !S.uid) { msg.textContent = "Penyimpanan tidak tersedia di tampilan ini. Buka dasbor melalui tautan claude.ai dalam keadaan masuk, atau isi berkas Excel lalu kirim ke tim kajian."; return; }
+  $("#fSubmit").disabled = true; msg.textContent = "Menyimpan…";
+  const entry = { ...F, src: "form", ts: Date.now() };
+  const body = { entries: { ...(S.myDoc?.entries || {}), [F.fgd]: entry }, updatedAt: Date.now() };
+  try { await S.db.doc("responses/" + S.uid).set(body); msg.textContent = "Tersimpan. Hasil di dasbor sudah diperbarui."; }
+  catch (e) { msg.textContent = e.code === "invalid_argument" ? "Akun Anda belum diberi izin mengisi. Minta tim kajian memberi akses Contributor." : "Gagal menyimpan (" + (e.code || "galat") + "). Coba lagi sebentar."; }
+  $("#fSubmit").disabled = false;
+});
+
+/* ---------------- Excel import ---------------- */
+const LV = (s) => { const m = String(s || "").match(/^(\d)/); return m ? +m[1] : null; };
+function parseSheet(ws, sheetName) {
+  const code = (sheetName.match(/^(F\d+)\b/) || [])[1]; if (!code || !fgdBy[code]) return null;
+  const rng = XLSX.utils.decode_range(ws["!ref"] || "A1:A1"), cell = (r, c) => { const x = ws[XLSX.utils.encode_cell({ r, c })]; return x ? x.v : undefined; };
+  const vals = Array(35).fill(null), D = ["", "", "", ""]; let any = 0;
+  for (let r = rng.s.r; r <= rng.e.r; r++) {
+    const a = cell(r, 0);
+    if (typeof a === "number" && a >= 1 && a <= 35 && cell(r, 2) === "vs") {
+      const ch = cell(r, 4), lv = LV(cell(r, 5));
+      if (ch === "Sama penting") { vals[a - 1] = 1; any++; }
+      else if ((ch === "Pilihan kiri" || ch === "Pilihan kanan") && lv) { vals[a - 1] = ch === "Pilihan kiri" ? lv : 1 / lv; any++; }
+    }
+    if (typeof a === "string" && /^D[1-4]$/.test(a)) { const v = cell(r + 1, 1); if (v != null) D[+a[1] - 1] = String(v); if (v) any++; }
+  }
+  if (!any) return null;
+  return { fgd: code, nama: String(cell(4, 3) ?? ""), institusi: String(cell(5, 3) ?? ""), kelompok: String(cell(6, 3) ?? "") || "Lainnya", jabatan: String(cell(7, 3) ?? ""),
+    A: vals.slice(0, 10), B: vals.slice(10, 25), C: vals.slice(25, 35), D, src: "excel" };
+}
+async function hashId(obj) {
+  const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(JSON.stringify(obj)));
+  return "x" + [...new Uint8Array(buf)].slice(0, 12).map((b) => b.toString(16).padStart(2, "0")).join("");
+}
+async function handleFiles(files) {
+  if (typeof XLSX === "undefined") { $("#impMsg").textContent = "Pembaca Excel belum termuat. Muat ulang halaman."; return; }
+  const found = [];
+  for (const file of files) {
+    try {
+      const wb = XLSX.read(await file.arrayBuffer(), { type: "array" });
+      for (const n of wb.SheetNames) { const e = parseSheet(wb.Sheets[n], n); if (e) found.push({ file: file.name, e }); }
+    } catch (err) { found.push({ file: file.name, err: true }); }
+  }
+  S.imp = found;
+  $("#impPreview").innerHTML = found.length ? `<div class="scroll"><table><thead><tr><th>Berkas</th><th>FGD</th><th>Kelompok</th><th>Institusi</th><th>Terisi</th><th>Kriteria</th><th>Jalur</th><th>Instrumen</th></tr></thead><tbody>${found.map(({ file, e, err }) => {
+    if (err) return `<tr><td>${esc(file)}</td><td colspan="7"><span class="pill bad">Berkas tidak dapat dibaca</span></td></tr>`;
+    const r = evalEntry(e), n = [...e.A, ...e.B, ...e.C].filter((v) => v != null).length;
+    return `<tr><td>${esc(file)}</td><td>${e.fgd} ${esc(fgdBy[e.fgd].kom)}</td><td>${esc(e.kelompok)}</td><td>${esc(e.institusi || "–")}</td><td class="num">${n}/35</td><td>${crPill(r.A?.cr)}</td><td>${crPill(r.crB)}</td><td>${crPill(r.C?.cr)}</td></tr>`; }).join("")}</tbody></table></div>`
+    : `<div class="empty"><strong>Tidak ada lembar FGD yang terisi</strong>Pastikan berkas adalah Instrumen_AHP_FGD_Hilirisasi.xlsx dan sel kuning sudah diisi.</div>`;
+  $("#impSave").disabled = !found.some((x) => x.e) || !S.canEdit || !S.db;
+  $("#impMsg").textContent = !S.canEdit ? "Hanya editor kajian yang dapat menyimpan hasil impor." : found.some((x) => x.e) ? `${found.filter((x) => x.e).length} jawaban siap disimpan.` : "";
+}
+$("#fileIn").addEventListener("change", (e) => handleFiles([...e.target.files]));
+const dz = $("#dz");
+dz.addEventListener("dragover", (e) => { e.preventDefault(); dz.classList.add("over"); });
+dz.addEventListener("dragleave", () => dz.classList.remove("over"));
+dz.addEventListener("drop", (e) => { e.preventDefault(); dz.classList.remove("over"); handleFiles([...e.dataTransfer.files].filter((f) => f.name.endsWith(".xlsx"))); });
+$("#impSave").addEventListener("click", async () => {
+  const ok = S.imp.filter((x) => x.e); if (!ok.length || !S.db) return;
+  $("#impSave").disabled = true; let n = 0;
+  for (const { e } of ok) {
+    const id = await hashId({ fgd: e.fgd, A: e.A, B: e.B, C: e.C, D: e.D, inst: e.institusi, nama: e.nama });
+    try { await S.db.doc("imports/" + id).set({ ...e, ts: Date.now() }); n++; } catch (err) { $("#impMsg").textContent = "Sebagian gagal disimpan (" + (err.code || "galat") + ")."; }
+  }
+  $("#impMsg").textContent = `${n} jawaban tersimpan dan sudah masuk ke dasbor.`; S.imp = []; $("#impPreview").innerHTML = ""; $("#fileIn").value = "";
+});
+function renderImpTable() {
+  const imp = S.live.filter((e) => e.src === "excel");
+  $("#impTable").innerHTML = imp.length
+    ? `<thead><tr><th>FGD</th><th>Kelompok</th><th>Institusi</th><th>Waktu</th><th></th></tr></thead><tbody>${imp.map((e) => `<tr><td>${e.fgd} ${esc(fgdBy[e.fgd]?.kom || "")}</td><td>${esc(e.kelompok)}</td><td>${esc(e.institusi || "–")}</td><td class="small">${new Date(e.ts).toLocaleString("id-ID", { dateStyle: "short", timeStyle: "short" })}</td><td>${S.canEdit ? `<button class="btn" data-del="${e.docId}">Hapus</button>` : ""}</td></tr>`).join("")}</tbody>`
+    : `<tbody><tr><td class="empty"><strong>Belum ada jawaban hasil impor</strong>Berkas Excel yang disimpan akan tercantum di sini.</td></tr></tbody>`;
+  $("#impTable").querySelectorAll("[data-del]").forEach((b) => b.addEventListener("click", async () => {
+    if (b.dataset.confirm !== "1") { b.dataset.confirm = "1"; b.textContent = "Yakin hapus?"; return; }
+    b.disabled = true; try { await S.db.doc("imports/" + b.dataset.del).delete(); } catch (e) { b.textContent = "Gagal"; }
+  }));
+}
+
+/* ---------------- views & boot ---------------- */
+function setView(v, keepHash) {
+  S.view = v;
+  document.querySelectorAll("nav.tabs button").forEach((b) => b.setAttribute("aria-selected", String(b.dataset.view === v)));
+  ["ringkasan", "komoditas", "isi", "impor"].forEach((x) => ($("#view-" + x).hidden = x !== v));
+  if (!keepHash && location.hash !== "#" + v) history.replaceState(null, "", "#" + v);
+  renderAll();
+}
+function renderAll() {
+  $("#sampleBanner").hidden = !S.useSample;
+  if (S.view === "ringkasan") renderSummary();
+  if (S.view === "komoditas") renderKom();
+  if (S.view === "impor") renderImpTable();
+}
+document.querySelectorAll("nav.tabs button").forEach((b) => b.addEventListener("click", () => setView(b.dataset.view)));
+function routeHash() {
+  const h = location.hash.slice(1).toLowerCase(), m = h.match(/^isi-(f\d+)$/);
+  if (m && fgdBy[m[1].toUpperCase()]) { if (S.form?.fgd !== m[1].toUpperCase()) loadForm(m[1].toUpperCase()); if (S.view !== "isi") setView("isi", true); return true; }
+  if (["ringkasan", "komoditas", "isi", "impor"].includes(h)) { if (h !== S.view) setView(h); return true; }
+  return false;
+}
+window.addEventListener("hashchange", routeHash);
+$("#grpSel").innerHTML += GROUPS.map((g) => `<option>${esc(g)}</option>`).join("");
+$("#fGrp").innerHTML += GROUPS.map((g) => `<option>${esc(g)}</option>`).join("");
+$("#fFgd").innerHTML = META.fgd.map((f) => `<option value="${f.code}">${f.code} ${esc(f.kom)} (${esc(f.tgl)})</option>`).join("");
+$("#grpSel").addEventListener("change", (e) => { S.grp = e.target.value; renderKom(); });
+$("#onlyCons").addEventListener("change", (e) => { S.onlyCons = e.target.checked; renderKom(); });
+$("#sampleOff").addEventListener("click", () => { S.useSample = false; setLive(); renderAll(); });
+
+function setLive(state) {
+  const dot = $("#dot"), t = $("#liveText");
+  dot.className = "dot";
+  if (S.useSample) { dot.classList.add("sample"); t.textContent = "Menampilkan data contoh"; return; }
+  if (state === "off") { t.innerHTML = `Data bersama tidak tersedia · <button class="btn" id="sampleOn" style="padding:3px 8px">Lihat contoh</button>`; $("#sampleOn").onclick = () => { S.sample ||= makeSample(); S.useSample = true; setLive(); renderAll(); }; return; }
+  dot.classList.add("on");
+  t.innerHTML = `Langsung · diperbarui ${new Date().toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" })}` + (S.live.length ? "" : ` · <button class="btn" id="sampleOn" style="padding:3px 8px">Lihat contoh</button>`);
+  const so = $("#sampleOn"); if (so) so.onclick = () => { S.sample ||= makeSample(); S.useSample = true; setLive(); renderAll(); };
+}
+
+let respDocs = [], impDocs = [];
+function rebuild() {
+  const out = [];
+  respDocs.forEach((d) => { const b = d.data() || {}; Object.values(b.entries || {}).forEach((e) => { if (e && fgdBy[e.fgd]) out.push({ ...e, docId: d.id }); }); });
+  impDocs.forEach((d) => { const e = d.data() || {}; if (fgdBy[e.fgd]) out.push({ ...e, src: "excel", docId: d.id }); });
+  S.live = out; if (!S.useSample) setLive(); renderAll();
+}
+
+S.form = blankForm(META.fgd[0].code);
+renderForm();
+if (!routeHash()) setView("ringkasan");
+
+(async () => {
+  const [db, user] = await Promise.all([window.claude?.use?.("db") ?? null, window.claude?.use?.("user") ?? null]);
+  S.db = db; S.user = user;
+  if (!db) { setLive("off"); $("#dbBanner").hidden = false; $("#dbBanner").textContent = "Penyimpanan bersama tidak tersedia di tampilan ini. Buka dasbor melalui tautan claude.ai dalam keadaan masuk untuk melihat dan mengirim jawaban."; return; }
+  if (user) {
+    S.uid = await user.id();
+    try { S.canEdit = !!(await user.canEdit()); } catch { S.canEdit = false; }
+    try { S.canWrite = await user.can("data.write"); } catch { S.canWrite = null; }
+  }
+  if (S.canWrite === false) { $("#fSubmit").disabled = true; $("#fMsg").textContent = "Akun Anda hanya dapat melihat. Minta akses Contributor kepada tim kajian untuk mengisi."; }
+  db.collection("responses").onSnapshot((snap) => {
+    respDocs = snap.docs.filter((d) => d.exists);
+    const mine = respDocs.find((d) => d.id === S.uid);
+    const had = !!S.myDoc; S.myDoc = mine ? mine.data() : null;
+    if (!had && S.myDoc) loadForm(S.form.fgd);
+    rebuild();
+  }, (e) => { $("#dbBanner").hidden = false; $("#dbBanner").textContent = "Pembaruan langsung terhenti (" + e.code + "). Muat ulang halaman."; });
+  db.collection("imports").onSnapshot((snap) => { impDocs = snap.docs.filter((d) => d.exists); rebuild(); },
+    () => {});
+})();
+</script>
+
+</body></html>
